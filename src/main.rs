@@ -1,28 +1,37 @@
 use rand::Rng; // Import Rng trait for random number generation
-use std::env; // For accessing command line arguments
+use std::io; // For accessing command line arguments
 use std::process; // For terminating the program
 
 fn main() {
-    let args: Vec<String> = env::args().collect(); // Collect command line arguments
-    if args.len() < 2 {
-        eprintln!("Usage: {} <guess>", args[0]); // Show usage if no arguments are given
-        process::exit(1); // Exit the program with an error code
-    }
-
-    let guess: i32 = match args[1].parse() { // Parse the first argument as an i32
-        Ok(num) => num,
-        Err(_) => {
-            eprintln!("Please provide a number as a guess."); // Handle invalid input
-            process::exit(1);
-        }
-    };
-
     let total = roll_dice(); // Roll two dice and sum them
 
-    if guess == total {
-        println!("YOU WIN!"); // User guessed correctly
-    } else {
-        println!("Sorry, the correct total was {}. Try again!", total); // Incorrect guess
+    loop {
+        println!("Guess the total of two dice (2-12):"); // Prompt the user for input
+        let mut guess = String::new(); // Create a new mutable string
+
+        io::stdin()
+            .read_line(&mut guess) // Read the user's input
+            .expect("failed to read line"); // Handle any errors
+
+        let guess: i32 = match guess.trim().parse() {
+            Ok(num) => num,
+            Err(_) => {
+                eprintln!("ERROR: Please provide a number as a guess."); // Handle invalid input
+                process::exit(1);
+            }
+        };
+
+        if guess < 2 || guess > 12 {
+            eprintln!("ERROR: Your guess must be between 2 and 12."); // Handle invalid input
+            process::exit(1);
+        }
+
+        if guess == total {
+            println!("YOU WIN!"); // User guessed correctly
+            break; // Exit the loop
+        } else {
+            println!("Sorry, that's not correct. Try again!"); // Incorrect guess
+            // The loop will continue, asking for another guess
     }
 }
 
