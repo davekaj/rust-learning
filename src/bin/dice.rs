@@ -30,8 +30,8 @@ fn main() {
             println!("YOU WIN!"); // User guessed correctly
             break; // Exit the loop
         } else {
-            println!("Sorry, that's not correct. Try again!"); // Incorrect guess
-            // The loop will continue, asking for another guess
+            println!("Sorry, that's not correct. Try again!"); // Incorrect guess, loop will continue
+        }
     }
 }
 
