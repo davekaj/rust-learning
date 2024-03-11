@@ -32,23 +32,25 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
     let mut deck = create_deck();
     let mut rng = thread_rng();
     deck.shuffle(&mut rng);
-    let mut player_hand = vec![deck.pop().unwrap(), deck.pop().unwrap()];
+    let mut player_hands = vec![vec![deck.pop().unwrap(), deck.pop().unwrap()]];
     let mut dealer_hand = vec![deck.pop().unwrap(), deck.pop().unwrap()];
 
-    println!("Your hand: {:?}, your score: {:?}", player_hand, hand_value(&player_hand));
+    println!("Your hand: {:?}, your score: {:?}", player_hands[0], hand_value(&player_hands[0]));
     println!("Dealer shows: {:?}", dealer_hand[0]);
 
     let mut player_turn = true;
     while player_turn {
-        println!("Do you want to (h)it, (s)tand, or (d)ouble down?");
+        println!("Do you want to (h)it, (s)tand, (d)ouble down, or s(p)lit?");
         let mut action = String::new();
         io::stdin().read_line(&mut action).expect("Failed to read line");
         match action.trim() {
             "h" => {
-                player_hand.push(deck.pop().unwrap());
+                for hand in &mut player_hands {
+                    hand.push(deck.pop().unwrap());
+                }
                 println!("You hit.");
-                println!("Your hand: {:?}, your score: {:?}", player_hand, hand_value(&player_hand));
-                if hand_value(&player_hand) > 21 {
+                print_hands(&player_hands);
+                if any_hand_busted(&player_hands) {
                     println!("Bust! You lose.");
                     *balance -= *bet;
                     return;
@@ -62,10 +64,12 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
                 if *balance < *bet * 2 {
                     println!("Insufficient balance to double down.");
                 } else {
-                    player_hand.push(deck.pop().unwrap());
+                    for hand in &mut player_hands {
+                        hand.push(deck.pop().unwrap());
+                    }
                     println!("You double down.");
-                    println!("Your hand: {:?}, your score: {:?}", player_hand, hand_value(&player_hand));
-                    if hand_value(&player_hand) > 21 {
+                    print_hands(&player_hands);
+                    if any_hand_busted(&player_hands) {
                         println!("Bust! You lose.");
                         *balance -= *bet * 2;
                         return;
@@ -74,7 +78,19 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
                     *bet *= 2;
                 }
             }
-            _ => println!("Invalid input. Please enter 'h' to hit, 's' to stand, or 'd' to double down."),
+            "p" => {
+                if player_hands.len() == 1 && can_split(&player_hands[0]) {
+                    let mut new_hand = vec![player_hands[0].pop().unwrap()];
+                    new_hand.push(deck.pop().unwrap());
+                    player_hands.push(new_hand);
+                    player_hands[0].push(deck.pop().unwrap());
+                    println!("You split your hand.");
+                    print_hands(&player_hands);
+                } else {
+                    println!("You cannot split your hand.");
+                }
+            }
+            _ => println!("Invalid input. Please enter 'h' to hit, 's' to stand, 'd' to double down, or 'p' to split."),
         }
     }
 
@@ -85,15 +101,43 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
     }
 
     println!("Dealer's score: {}", hand_value(&dealer_hand));
-    println!("Your score: {}", hand_value(&player_hand));
-
-    if hand_value(&dealer_hand) > 21 || hand_value(&player_hand) > hand_value(&dealer_hand) {
-        println!("You win!");
-        *balance += *bet;
-    } else {
-        println!("Dealer wins.");
-        *balance -= *bet;
+    let mut player_wins = 0;
+    let mut player_loses = 0;
+    for hand in &player_hands {
+        let player_score = hand_value(hand);
+        println!("Your score: {}", player_score);
+        if hand_value(&dealer_hand) > 21 || player_score > hand_value(&dealer_hand) {
+            println!("You win this hand!");
+            player_wins += 1;
+        } else {
+            println!("Dealer wins this hand.");
+            player_loses += 1;
+        }
     }
+
+    if player_wins > 0 {
+        println!("You won {} hand(s)!", player_wins);
+        *balance += *bet * player_wins as u32;
+    }
+    if player_loses > 0 {
+        println!("You lost {} hand(s).", player_loses);
+        *balance -= *bet * player_loses as u32;
+    }
+}
+
+fn print_hands(player_hands: &[Vec<String>]) {
+    for (i, hand) in player_hands.iter().enumerate() {
+        println!("Your hand {}: {:?}, your score: {:?}", i + 1, hand, hand_value(hand));
+    }
+}
+
+fn any_hand_busted(player_hands: &[Vec<String>]) -> bool {
+    player_hands.iter().any(|hand| hand_value(hand) > 21)
+}
+
+fn can_split(hand: &[String]) -> bool {
+    let rank = hand[0].split_whitespace().next().unwrap();
+    hand.iter().all(|card| card.split_whitespace().next().unwrap() == rank)
 }
 
 fn create_deck() -> Vec<String> {
