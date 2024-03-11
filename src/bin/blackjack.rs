@@ -4,10 +4,31 @@ use std::io;
 
 fn main() {
     println!("Welcome to Blackjack!");
-    play_blackjack();
+    let mut balance = 100;
+    loop {
+        println!("Your balance: ${}", balance);
+        if balance == 0 {
+            println!("You're out of money. Game over!");
+            break;
+        }
+
+        println!("Place your bet (or 'q' to quit):");
+        let mut bet_input = String::new();
+        io::stdin().read_line(&mut bet_input).expect("Failed to read line");
+        if bet_input.trim() == "q" {
+            break;
+        }
+        let mut bet: u32 = bet_input.trim().parse().expect("Invalid bet amount");
+        if bet > balance {
+            println!("Insufficient balance. Please enter a lower bet.");
+            continue;
+        }
+
+        play_blackjack(&mut balance, &mut bet);
+    }
 }
 
-fn play_blackjack() {
+fn play_blackjack(balance: &mut u32, bet: &mut u32) {
     let mut deck = create_deck();
     let mut rng = thread_rng();
     deck.shuffle(&mut rng);
@@ -17,8 +38,9 @@ fn play_blackjack() {
     println!("Your hand: {:?}, your score: {:?}", player_hand, hand_value(&player_hand));
     println!("Dealer shows: {:?}", dealer_hand[0]);
 
-    loop {
-        println!("Do you want to (h)it or (s)tand?");
+    let mut player_turn = true;
+    while player_turn {
+        println!("Do you want to (h)it, (s)tand, or (d)ouble down?");
         let mut action = String::new();
         io::stdin().read_line(&mut action).expect("Failed to read line");
         match action.trim() {
@@ -28,20 +50,37 @@ fn play_blackjack() {
                 println!("Your hand: {:?}, your score: {:?}", player_hand, hand_value(&player_hand));
                 if hand_value(&player_hand) > 21 {
                     println!("Bust! You lose.");
+                    *balance -= *bet;
                     return;
                 }
             }
             "s" => {
                 println!("You stand.");
-                break;
+                player_turn = false;
             }
-            _ => println!("Invalid input. Please enter 'h' to hit or 's' to stand."),
+            "d" => {
+                if *balance < *bet * 2 {
+                    println!("Insufficient balance to double down.");
+                } else {
+                    player_hand.push(deck.pop().unwrap());
+                    println!("You double down.");
+                    println!("Your hand: {:?}, your score: {:?}", player_hand, hand_value(&player_hand));
+                    if hand_value(&player_hand) > 21 {
+                        println!("Bust! You lose.");
+                        *balance -= *bet * 2;
+                        return;
+                    }
+                    player_turn = false;
+                    *bet *= 2;
+                }
+            }
+            _ => println!("Invalid input. Please enter 'h' to hit, 's' to stand, or 'd' to double down."),
         }
     }
 
     while hand_value(&dealer_hand) < 17 {
         dealer_hand.push(deck.pop().unwrap());
-        println!("Dealer hits. New score: {}", hand_value(&dealer_hand));
+        println!("Dealer hits.");
         println!("Dealer's hand: {:?}", dealer_hand);
     }
 
@@ -50,8 +89,10 @@ fn play_blackjack() {
 
     if hand_value(&dealer_hand) > 21 || hand_value(&player_hand) > hand_value(&dealer_hand) {
         println!("You win!");
+        *balance += *bet;
     } else {
         println!("Dealer wins.");
+        *balance -= *bet;
     }
 }
 
