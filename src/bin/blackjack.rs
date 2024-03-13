@@ -52,6 +52,7 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
                     println!("You hit.");
                     if hand_value(&player_hands[current_hand_index]) > 21 {
                         println!("Bust! You lose this hand.");
+                        current_hand_index += 1;
                         player_turn = false;
                     }
                 }
@@ -69,8 +70,8 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
                         if hand_value(&player_hands[current_hand_index]) > 21 {
                             println!("Bust! You lose this hand.");
                             *balance -= *bet * 2;
-                            player_turn = false;
                             current_hand_index += 1;
+                            player_turn = false;
                         } else {
                             player_turn = false;
                             current_hand_index += 1;
