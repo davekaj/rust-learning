@@ -100,15 +100,30 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
         println!("Dealer's hand: {:?}", dealer_hand);
     }
 
-    println!("Dealer's score: {}", hand_value(&dealer_hand));
+    let dealer_score = hand_value(&dealer_hand);
+    println!("Dealer's score: {}", dealer_score);
     let mut player_wins = 0;
     let mut player_loses = 0;
+    let mut player_ties = 0;
     for hand in &player_hands {
         let player_score = hand_value(hand);
         println!("Your score: {}", player_score);
-        if hand_value(&dealer_hand) > 21 || player_score > hand_value(&dealer_hand) {
+        if player_score == 21 && hand.len() == 2 && dealer_score != 21 {
+            println!("Blackjack! You win this hand!");
+            player_wins += 1;
+            *balance += (*bet * 3) / 2;
+        } else if dealer_score == 21 && dealer_hand.len() == 2 && player_score != 21 {
+            println!("Dealer has Blackjack. You lose this hand.");
+            player_loses += 1;
+        } else if player_score > 21 {
+            println!("Bust! You lose this hand.");
+            player_loses += 1;
+        } else if dealer_score > 21 || player_score > dealer_score {
             println!("You win this hand!");
             player_wins += 1;
+        } else if player_score == dealer_score {
+            println!("It's a tie!");
+            player_ties += 1;
         } else {
             println!("Dealer wins this hand.");
             player_loses += 1;
@@ -122,6 +137,9 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
     if player_loses > 0 {
         println!("You lost {} hand(s).", player_loses);
         *balance -= *bet * player_loses as u32;
+    }
+    if player_ties > 0 {
+        println!("You tied {} hand(s).", player_ties);
     }
 }
 
