@@ -64,6 +64,8 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
                     player_hands[current_hand_index].push(deck.pop().unwrap());
                     println!("You hit.");
                     if hand_value(&player_hands[current_hand_index]) > 21 {
+                        println!("Hand {}: {}", current_hand_index + 1, format_hand(&player_hands[current_hand_index]));
+                        println!("{}{}","Your Score: ".blue(), value.to_string().blue());
                         println!("{}", "Bust! You lose this hand.".red());
                         current_hand_index += 1;
                         player_turn = false;
