@@ -1,14 +1,17 @@
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::io;
+use colored::*;
+use std::thread;
+use std::time::Duration;
 
 fn main() {
     println!("Welcome to Blackjack!");
     let mut balance = 100;
     loop {
-        println!("Your balance: ${}", balance);
+        println!("Your balance: ${}", balance.to_string().green());
         if balance == 0 {
-            println!("You're out of money. Game over!");
+            println!("{}", String::from("You're out of money. Game over!").red());
             break;
         }
 
@@ -33,17 +36,21 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
     let mut rng = thread_rng();
     deck.shuffle(&mut rng);
     let mut player_hands = vec![vec![deck.pop().unwrap(), deck.pop().unwrap()]];
-    let mut dealer_hand = vec![deck.pop().unwrap(), deck.pop().unwrap()];
+    let mut dealer_hand: Vec<String> = vec![deck.pop().unwrap(), deck.pop().unwrap()];
+    // println!("{}", player_hands[0].join(", "));
+    // println!("{}", dealer_hand.join(", "));
 
-    println!("Your hand: {:?}, your score: {:?}", player_hands[0], hand_value(&player_hands[0]));
-    println!("Dealer shows: {:?}", dealer_hand[0]);
+    // println!("Your hand: {:?}", format_hand(&player_hands[0], "blue"));
+    // println!("Your score: {}", hand_value(&player_hands[0]).to_string().blue());
+    println!("Dealer shows: {}", format_card(&dealer_hand[0], "yellow"));
 
     let mut current_hand_index = 0;
     while current_hand_index < player_hands.len() {
         let mut player_turn = true;
         while player_turn {
-            println!("Hand {}: {:?}, your score: {:?}", current_hand_index + 1, player_hands[current_hand_index], hand_value(&player_hands[current_hand_index]));
-            println!("Do you want to (h)it, (s)tand, (d)ouble down, or (p)lit?");
+            println!("Hand {}: {}", current_hand_index + 1, format_hand(&player_hands[current_hand_index], "blue"));
+            println!("{}{}","Your Score: ".blue(), hand_value(&player_hands[current_hand_index]).to_string().blue());
+            println!("Do you want to (h)it, (s)tand, (d)ouble down, or (p)lit?\n");
             let mut action = String::new();
             io::stdin().read_line(&mut action).expect("Failed to read line");
             match action.trim() {
@@ -51,7 +58,7 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
                     player_hands[current_hand_index].push(deck.pop().unwrap());
                     println!("You hit.");
                     if hand_value(&player_hands[current_hand_index]) > 21 {
-                        println!("Bust! You lose this hand.");
+                        println!("{}", "Bust! You lose this hand.".red());
                         current_hand_index += 1;
                         player_turn = false;
                     }
@@ -68,7 +75,7 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
                         player_hands[current_hand_index].push(deck.pop().unwrap());
                         println!("You double down.");
                         if hand_value(&player_hands[current_hand_index]) > 21 {
-                            println!("Bust! You lose this hand.");
+                            println!("{}", "Bust! You lose this hand.".red());
                             *balance -= *bet * 2;
                             current_hand_index += 1;
                             player_turn = false;
@@ -96,52 +103,81 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
     }
 
     while hand_value(&dealer_hand) < 17 {
+        println!("Dealer is thinking...");
+        thread::sleep(Duration::from_secs(5)); // Delay for 5 seconds
         dealer_hand.push(deck.pop().unwrap());
         println!("Dealer hits.");
-        println!("Dealer's hand: {:?}", dealer_hand);
+        println!("Dealer's hand: {}\n", format_hand(&dealer_hand, "yellow"));
     }
 
     let dealer_score = hand_value(&dealer_hand);
-    println!("Dealer's score: {}", dealer_score);
+    println!("Dealer's score: {}", dealer_score.to_string().yellow());
     let mut player_wins = 0;
     let mut player_loses = 0;
     let mut player_ties = 0;
     for hand in &player_hands {
         let player_score = hand_value(hand);
-        println!("Your score: {}", player_score);
+        println!("Your score: {}", player_score.to_string().blue());
         if player_score == 21 && hand.len() == 2 && dealer_score != 21 {
-            println!("Blackjack! You win this hand!");
+            println!("{}", "Blackjack! You win this hand!".green());
             player_wins += 1;
             *balance += (*bet * 3) / 2;
         } else if dealer_score == 21 && dealer_hand.len() == 2 && player_score != 21 {
-            println!("Dealer has Blackjack. You lose this hand.");
+            println!("{}", "Dealer has Blackjack. You lose this hand.".red());
             player_loses += 1;
         } else if player_score > 21 {
-            println!("Bust! You lose this hand.");
+            println!("{}", "Bust! You lose this hand.".red());
             player_loses += 1;
         } else if dealer_score > 21 || player_score > dealer_score {
-            println!("You win this hand!");
+            println!("{}", "You win this hand!".green());
             player_wins += 1;
         } else if player_score == dealer_score {
             println!("It's a tie!");
             player_ties += 1;
         } else {
-            println!("Dealer wins this hand.");
+            println!("{}", "Dealer wins this hand".red());
             player_loses += 1;
         }
     }
 
     if player_wins > 0 {
-        println!("You won {} hand(s)!", player_wins);
+        println!("You won {} hand(s)!", player_wins.to_string().green());
         *balance += *bet * player_wins as u32;
     }
     if player_loses > 0 {
-        println!("You lost {} hand(s).", player_loses);
+        println!("You lost {} hand(s).", player_loses.to_string().red());
         *balance -= *bet * player_loses as u32;
     }
     if player_ties > 0 {
         println!("You tied {} hand(s).", player_ties);
     }
+}
+fn format_hand(hand: &[String], color: &str) -> String {
+    hand.iter()
+        .map(|card| format_card(card, color)) // Assuming format_card returns ColoredString
+        .map(|colored_card| colored_card.to_string()) // Convert each ColoredString to String
+        .collect::<Vec<String>>() // Now collecting into Vec<String>
+        .join(", ")
+}
+
+fn format_card(card: &str, color: &str) -> ColoredString {
+    let suit = card.split_whitespace().last().unwrap();
+    // let rank = card.split_whitespace().next().unwrap();
+    let mut colored_card: ColoredString = card.to_owned().bold(); // DK - Made bold just to convert it
+
+    match suit {
+        "Hearts" | "Diamonds" => colored_card = colored_card.red(),
+        "Spades" | "Clubs" => colored_card = colored_card.black(),
+        _ => {}
+    }
+    colored_card
+    // println!("CCCCCC: {}", colored_card);
+
+    // match color {
+    //     "blue" => colored_card.blue(),
+    //     "yellow" => colored_card.yellow(),
+    //     _ => colored_card.normal(),
+    // }
 }
 
 fn can_split(hand: &[String]) -> bool {
