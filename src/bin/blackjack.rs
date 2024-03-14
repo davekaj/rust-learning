@@ -45,7 +45,17 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
         let mut player_turn = true;
         while player_turn {
             println!("Hand {}: {}", current_hand_index + 1, format_hand(&player_hands[current_hand_index]));
-            println!("{}{}","Your Score: ".blue(), hand_value(&player_hands[current_hand_index]).to_string().blue());
+            let value = hand_value(&player_hands[current_hand_index]);
+            if value == 21 {
+                match player_hands[current_hand_index].len() {
+                    2 => println!("{}", "Blackjack!\n".green()),
+                    _ => println!("{}", "You have 21!\n".green()),
+                }
+                player_turn = false;
+                current_hand_index += 1;
+                continue;
+            }
+            println!("{}{}","Your Score: ".blue(), value.to_string().blue());
             println!("Do you want to (h)it, (s)tand, (d)ouble down, or (p)lit?\n");
             let mut action = String::new();
             io::stdin().read_line(&mut action).expect("Failed to read line");
