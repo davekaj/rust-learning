@@ -41,6 +41,7 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
     println!("{}{}", "Dealer shows: ".yellow(), format_card(&dealer_hand[0]));
 
     let mut current_hand_index = 0;
+    let mut all_hands_busted = false;
     while current_hand_index < player_hands.len() {
         let mut player_turn = true;
         while player_turn {
@@ -65,10 +66,13 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
                     println!("You hit.");
                     if hand_value(&player_hands[current_hand_index]) > 21 {
                         println!("Hand {}: {}", current_hand_index + 1, format_hand(&player_hands[current_hand_index]));
-                        println!("{}{}","Your Score: ".blue(), value.to_string().blue());
+                        println!("{}{}","Your Score: ".blue(), hand_value(&player_hands[current_hand_index]));
                         println!("{}", "Bust! You lose this hand.".red());
                         current_hand_index += 1;
                         player_turn = false;
+                        if player_hands.iter().all(|hand| hand_value(hand) > 21) {
+                            all_hands_busted = true;
+                        }
                     }
                 }
                 "s" => {
@@ -88,6 +92,9 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
                             *balance -= *bet * 2;
                             current_hand_index += 1;
                             player_turn = false;
+                            if player_hands.iter().all(|hand| hand_value(hand) > 21) {
+                                all_hands_busted = true;
+                            }
                         } else {
                             println!("Hand {}: {}", current_hand_index + 1, format_hand(&player_hands[current_hand_index]));
                             println!("{}{}","Your Score: ".blue(), hand_value(&player_hands[current_hand_index]).to_string().blue());
@@ -112,6 +119,12 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
                 _ => println!("Invalid input. Please enter 'h' to hit, 's' to stand, 'd' to double down, or 'p' to split."),
             }
         }
+    }
+
+    if all_hands_busted {
+        println!("All hands busted. You lose!");
+        *balance -= *bet * player_hands.len() as u32;
+        return;
     }
 
     while hand_value(&dealer_hand) < 17 {
