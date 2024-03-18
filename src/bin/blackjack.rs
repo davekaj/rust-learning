@@ -60,13 +60,6 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
     while current_hand_index < player_hands.len() {
         let mut player_turn = true;
         while player_turn {
-            println!(
-                "{}{}{}{}",
-                "Hand ".blue(),
-                (current_hand_index + 1).to_string().blue(),
-                ": ",
-                format_hand(&player_hands[current_hand_index])
-            );
             let value = hand_value(&player_hands[current_hand_index]);
             if value == 21 {
                 match player_hands[current_hand_index].len() {
@@ -77,7 +70,7 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
                 current_hand_index += 1;
                 continue;
             }
-            println!("{}{}", "Your Score: ".blue(), value.to_string().blue());
+            print_player_hand(&player_hands[current_hand_index], current_hand_index);
             println!("Do you want to (h)it, (s)tand, (d)ouble down, or (p)lit?\n");
             let mut action = String::new();
             io::stdin()
@@ -88,8 +81,7 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
                     player_hands[current_hand_index].push(deck.pop().unwrap());
                     println!("You hit.");
                     if hand_value(&player_hands[current_hand_index]) > 21 {
-                        println!("Hand {}: {}", current_hand_index + 1, format_hand(&player_hands[current_hand_index]));
-                        println!("{}{}","Your Score: ".blue(), hand_value(&player_hands[current_hand_index]));
+                        print_player_hand(&player_hands[current_hand_index], current_hand_index);
                         println!("{}", "Bust! You lose this hand.".red());
                         current_hand_index += 1;
                         player_turn = false;
@@ -119,8 +111,7 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
                                 all_hands_busted = true;
                             }
                         } else {
-                            println!("Hand {}: {}", current_hand_index + 1, format_hand(&player_hands[current_hand_index]));
-                            println!("{}{}","Your Score: ".blue(), hand_value(&player_hands[current_hand_index]).to_string().blue());
+                            print_player_hand(&player_hands[current_hand_index], current_hand_index);
                             println!("");
                             player_turn = false;
                             current_hand_index += 1;
@@ -301,4 +292,15 @@ fn hand_value(hand: &[String]) -> i32 {
     } else {
         value
     }
+}
+
+fn print_player_hand(hand: &[String], hand_index: usize) {
+    println!(
+        "{}{}{}{}",
+        "Hand ".blue(),
+        (hand_index + 1).to_string().blue(),
+        ": ",
+        format_hand(&hand)
+    );
+    println!("{}{}", "Your Score: ".blue(), hand_value(&hand).to_string().blue());
 }
