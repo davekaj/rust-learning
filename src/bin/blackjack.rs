@@ -20,7 +20,7 @@ fn main() {
             break;
         }
 
-        println!("Place your bet (or 'q' to quit):");
+        println!("Place your bet (or 'q' to quit)");
         let mut bet_input = String::new();
         io::stdin()
             .read_line(&mut bet_input)
@@ -28,22 +28,49 @@ fn main() {
         if bet_input.trim() == "q" {
             break;
         }
-        let mut bet: u32 = bet_input.trim().parse().expect("Invalid bet amount");
+        let mut parts = bet_input.trim().split_whitespace();
+        let mut bet: u32;
+        let mut secret_mode = false;
+        if let Some(first_part) = parts.next() {
+            if first_part == "s" {
+                secret_mode = true;
+                if let Some(bet_str) = parts.next() {
+                    bet = bet_str.parse().expect("Invalid bet amount");
+                } else {
+                    println!("Please provide a valid bet amount after 's'");
+                    continue;
+                }
+            } else {
+                bet = first_part.parse().expect("Invalid bet amount");
+            }
+        } else {
+            println!("Please provide a valid bet amount");
+            continue;
+        }
+
         if bet > balance {
             println!("Insufficient balance. Please enter a lower bet.");
             continue;
         }
 
-        play_blackjack(&mut balance, &mut bet);
+        play_blackjack(&mut balance, &mut bet, secret_mode);
     }
 }
 
-fn play_blackjack(balance: &mut u32, bet: &mut u32) {
+fn play_blackjack(balance: &mut u32, bet: &mut u32, secret: bool) {
     let mut deck = create_deck();
     let mut rng = thread_rng();
     deck.shuffle(&mut rng);
-    let mut player_hands = vec![vec![deck.pop().unwrap(), deck.pop().unwrap()]];
-    let mut dealer_hand: Vec<String> = vec![deck.pop().unwrap(), deck.pop().unwrap()];
+    let mut player_hands: Vec<Vec<String>>;
+    let mut dealer_hand: Vec<String>;
+    if secret {
+        player_hands = vec![pick_cards(&mut deck)];
+        dealer_hand = pick_cards(&mut deck);
+    } else {
+        player_hands = vec![vec![deck.pop().unwrap(), deck.pop().unwrap()]];
+        dealer_hand = vec![deck.pop().unwrap(), deck.pop().unwrap()];
+    }
+
     println!(
         "{}{}",
         "\nDealer shows: ".yellow(),
@@ -214,6 +241,25 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32) {
         println!("You tied {} hand(s).", player_ties);
     }
 }
+
+// TODO - Fix bug where picking 2 cards caused the second picked card to have its indices shifted by 1
+fn pick_cards(deck: &mut Vec<String>) -> Vec<String> {
+    let mut hand = Vec::new();
+    println!("Pick your cards:");
+    for (i, card) in deck.iter().enumerate() {
+        println!("{}: {}", i + 1, card);
+    }
+    for _ in 0..2 {
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
+        let index = input.trim().parse::<usize>().unwrap() - 1;
+        hand.push(deck.remove(index));
+    }
+    hand
+}
+
 fn format_hand(hand: &[String]) -> String {
     hand.iter()
         .map(|card| format_card(card)) // Assuming format_card returns ColoredString
@@ -302,5 +348,9 @@ fn print_player_hand(hand: &[String], hand_index: usize) {
         ": ",
         format_hand(&hand)
     );
-    println!("{}{}", "Your Score: ".blue(), hand_value(&hand).to_string().blue());
+    println!(
+        "{}{}",
+        "Your Score: ".blue(),
+        hand_value(&hand).to_string().blue()
+    );
 }
