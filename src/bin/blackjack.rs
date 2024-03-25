@@ -64,8 +64,9 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32, secret: bool) {
     let mut player_hands: Vec<Vec<String>>;
     let mut dealer_hand: Vec<String>;
     if secret {
-        player_hands = vec![pick_cards(&mut deck)];
-        dealer_hand = pick_cards(&mut deck);
+        player_hands = vec![pick_cards(&mut deck, false)];
+        print!("Pick dealers hand");
+        dealer_hand = pick_cards(&mut deck, true);
     } else {
         player_hands = vec![vec![deck.pop().unwrap(), deck.pop().unwrap()]];
         dealer_hand = vec![deck.pop().unwrap(), deck.pop().unwrap()];
@@ -242,21 +243,43 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32, secret: bool) {
     }
 }
 
-// TODO - Fix bug where picking 2 cards caused the second picked card to have its indices shifted by 1
-fn pick_cards(deck: &mut Vec<String>) -> Vec<String> {
+// TODO - Fails when wrong cards are chosen (it just continues, when it should ask again)
+fn pick_cards(deck: &mut Vec<String>, dealer: bool) -> Vec<String> {
     let mut hand = Vec::new();
-    println!("Pick your cards:");
     for (i, card) in deck.iter().enumerate() {
-        println!("{}: {}", i + 1, card);
+        println!("{}: {}", i, card);
     }
+    if dealer {
+        println!("\nPick dealers hand by choosing the index of the 1st card, pressing enter, and then choosing the index of the 2nd card.");
+    } else {
+        println!("\nPick your hand by choosing the index of the 1st card, pressing enter, and then choosing the index of the 2nd card.");
+    }
+    let mut picked_indices = Vec::new();
     for _ in 0..2 {
         let mut input = String::new();
         io::stdin()
             .read_line(&mut input)
             .expect("Failed to read line");
-        let index = input.trim().parse::<usize>().unwrap() - 1;
-        hand.push(deck.remove(index));
+        let index = input.trim().parse::<usize>().unwrap();
+        if index >= deck.len() {
+            println!("Invalid index. Please try again.");
+            continue;
+        }
+        if picked_indices.contains(&index) {
+            println!("You've already picked that card. Please try again.");
+            continue;
+        }
+
+        picked_indices.push(index);
     }
+    // Sort in descending order so that removing elements doesn't mess up the indices
+    picked_indices.sort_by(|a, b| b.cmp(a));
+    // clone cards into hand and remove them from deck
+    for index in picked_indices {
+        hand.push(deck[index].clone());
+        deck.remove(index);
+    }
+
     hand
 }
 
