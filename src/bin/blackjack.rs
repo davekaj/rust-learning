@@ -169,31 +169,8 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32, secret: bool) {
         return;
     }
 
-    while hand_value(&dealer_hand) < 17 {
-        println!(
-            "{}{}",
-            "\nDealer shows: ".yellow(),
-            format_hand(&dealer_hand)
-        );
-        println!(
-            "{}{}",
-            "Dealer score: ".yellow(),
-            hand_value(&dealer_hand).to_string().yellow() // Pass only the first card
-        );
-        println!("Dealer is thinking...");
-        thread::sleep(Duration::from_secs(3)); // Delay for 2 seconds
-        dealer_hand.push(deck.pop().unwrap());
-        println!("Dealer hits.");
-        println!("Dealer's hand: {}", format_hand(&dealer_hand));
-    }
+    let dealer_score = dealer_turn(&mut deck, &mut dealer_hand);
 
-    let dealer_score = hand_value(&dealer_hand);
-    println!(
-        "{}{}",
-        "\nDealer shows: ".yellow(),
-        format_hand(&dealer_hand)
-    );
-    println!("Dealer's score: {}", dealer_score.to_string().yellow());
     let mut player_wins = 0;
     let mut player_loses = 0;
     let mut player_ties = 0;
@@ -242,6 +219,39 @@ fn play_blackjack(balance: &mut u32, bet: &mut u32, secret: bool) {
         println!("You tied {} hand(s).", player_ties);
     }
 }
+
+fn dealer_turn(deck: &mut Vec<String>, dealer_hand: &mut Vec<String>) -> i32 {
+    while hand_value(&dealer_hand) < 17 {
+        println!(
+            "{}{}",
+            "\nDealer shows: ".yellow(),
+            format_hand(&dealer_hand)
+        );
+        println!(
+            "{}{}",
+            "Dealer score: ".yellow(),
+            hand_value(&dealer_hand).to_string().yellow() // Pass only the first card
+        );
+        println!("Dealer is thinking...");
+        thread::sleep(Duration::from_secs(3)); // Delay for 2 seconds
+        dealer_hand.push(deck.pop().unwrap());
+        println!("Dealer hits.");
+        println!("Dealer's hand: {}", format_hand(&dealer_hand));
+    }
+
+    let dealer_score = hand_value(&dealer_hand);
+    println!(
+        "{}{}",
+        "\nDealer shows: ".yellow(),
+        format_hand(&dealer_hand)
+    );
+    println!("Dealer's score: {}", dealer_score.to_string().yellow());
+    dealer_score
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////// HELPER FUNCTIONS /////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // TODO - Fails when wrong cards are chosen (it just continues, when it should ask again)
 fn pick_cards(deck: &mut Vec<String>, dealer: bool) -> Vec<String> {
