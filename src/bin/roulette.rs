@@ -12,42 +12,33 @@ fn main() {
         guess = "37".to_string(); // Treat 00 as 37
     }
 
-    let guess: u32 = match guess.trim().parse() {
+    let guess: usize = match guess.trim().parse() {
         Ok(num) => num,
         Err(_) => {
             eprintln!("ERROR: Please provide a positive integer as a guess."); // Handle invalid input
             process::exit(1);
         }
     };
-    println!("You guessed: {}", guess); // Print the user's guess
-    // don't need to check if less than 0 because it's a u32
+    println!("You guessed: {} {}", to_colour(get_colour(guess)), guess); // Print the user's guess
+    // don't need to check if less than 0 because it's a usize
     if guess > 37 {
         eprintln!("ERROR: Your guess must be between 0 and 36, or 00"); // Handle invalid input
         process::exit(1);
     }
 
     let result = play_roulette();
+    let colour = get_colour(result);
 
     if guess == result {
         println!("YOU WIN!"); // User guessed correctly
     } else {
-        println!("Sorry, you lost, it landed on {}", result);
+        println!("Sorry, you lost, it landed on {} {}", to_colour(colour), result);
     }
 }
 
-fn play_roulette() -> u32 {
-    let mut rng = rand::thread_rng(); // Get a random number generator
-    create_wheel();
-    return rng.gen_range(1..=37); // Roll the first die (1-6)
-}
-
-fn create_wheel() -> [[usize; 2]; 38] {
-    let mut wheel = [[0usize,0usize]; 38];
-    for i in 0..38 {
-        wheel[i] = [i, get_colour(i)];
-    }
-    println!("wheel: {:?}", wheel);
-    wheel
+fn play_roulette() -> usize {
+    let mut rng = rand::thread_rng();
+    return rng.gen_range(1..=37);
 }
 
 // 0 = black, 1 = red, 2 = green
@@ -62,5 +53,14 @@ fn get_colour(num: usize) -> usize {
         return 0;
     } else {
         panic!("Invalid number: {}", num);
+    }
+}
+
+fn to_colour(num: usize) -> String {
+    match num {
+        0 => "Black".to_string(),
+        1 => "Red".to_string(),
+        2 => "Green".to_string(),
+        _ => panic!("Invalid colour: {}", num),
     }
 }
