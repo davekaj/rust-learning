@@ -5,7 +5,7 @@ use std::process; // For terminating the program // For colored text
 
 fn main() {
     print_roulette_table();
-    println!("What would you like to bet on? \n - color (c)\n - Parity (Even/Odd) (p)\n - 1-18/19-36 (h)\n - Dozen (d)\n - Column (co)\n - Number (n)");
+    println!("What would you like to bet on? \n - Color (c)\n - Parity (Even/Odd) (p)\n - 1-18/19-36 (h)\n - Dozen (d)\n - Column (co)\n - Number (n)");
 
     let mut choice = String::new();
     io::stdin()
@@ -29,22 +29,23 @@ fn main() {
 fn spin_table() -> usize {
     let mut rng = rand::thread_rng();
     return rng.gen_range(1..=37);
+    // return 37;
 }
 
 fn play_color() {
-    println!("Choose Red (r) or Black (b)"); // Prompt the user for input
-    let mut guess = String::new(); // Create a new mutable string
+    println!("Choose Red (r) or Black (b)");
+    let mut guess = String::new();
     io::stdin()
-        .read_line(&mut guess) // Read the user's input
-        .expect("Failed to read line"); // Handle any errors
+        .read_line(&mut guess) 
+        .expect("Failed to read line");
 
-    let guess = guess.trim(); // Trim the whitespace from the input
+    let guess = guess.trim();
     if guess == "r" {
         println!("{}", "You bet on red!".red());
     } else if guess == "b" {
         println!("{}", "You bet on black!".black());
     } else {
-        eprintln!("ERROR: Please provide 'r' or 'b' for color choice"); // Handle invalid input
+        eprintln!("ERROR: Please provide 'r' or 'b' for color choice");
         process::exit(1);
     }
 
@@ -58,7 +59,32 @@ fn play_color() {
     }
 }
 
-fn play_parity() {}
+fn play_parity() {
+    println!("Choose Even (e) or Odd (o)");
+    let mut guess = String::new();
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    let guess = guess.trim();
+    if guess == "e" {
+        println!("You bet on Even!");
+    } else if guess == "o" {
+        println!("You bet on Odd!");
+    } else {
+        eprintln!("ERROR: Please provide 'e' or 'o' for parity choice");
+        process::exit(1);
+    }
+
+    let result = spin_table();
+    let result_parity = get_parity(result);
+    println!("Result: {}", color_print(result));
+    if result_parity == guess {
+        println!("{}", "YOU WIN!".green());
+    } else {
+        println!("{}", "Sorry, you lost.".red());
+    }
+}
 
 fn play_range() {}
 
@@ -120,6 +146,18 @@ fn get_color(num: usize) -> String {
         return "r".to_string();
     } else if num <= 37 {
         return "b".to_string();
+    } else {
+        panic!("Invalid number: {}", num);
+    }
+}
+
+fn get_parity(num: usize) -> String {
+    if num == 0 || num == 37 {
+        return "zeros".to_string();
+    } else if num % 2 == 0 {
+        return "e".to_string();
+    } else if num % 2 == 1 {
+        return "o".to_string();
     } else {
         panic!("Invalid number: {}", num);
     }
