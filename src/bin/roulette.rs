@@ -13,58 +13,41 @@ fn main() {
         .expect("Failed to read line");
     choice = choice.trim().to_lowercase();
 
-    let guess = match choice.as_str() {
-        "c" => verify_colour(),
-        "p" => verify_parity(),
-        "h" => verify_range(),
-        "d" => verify_dozen(),
-        "co" => verify_column(),
-        "n" => verify_number(),
+    match choice.as_str() {
+        "c" => play_colour(),
+        "p" => play_parity(),
+        "h" => play_range(),
+        "d" => play_dozen(),
+        "co" => play_column(),
+        "n" => play_number(),
         _ => {
             println!("Invalid choice");
             0
         }
     };
-
-    println!("You guessed: {}", colour_print(guess)); // Print the user's guess
-
-    let result = play_roulette();
-    let colour: usize = get_colour(result);
-    println!("Result: {}", colour_print(result));
-
-    if guess == result {
-        println!("YOU WIN!"); // User guessed correctly
-    } else {
-        println!("Sorry, you lost");
-    }
 }
 
-fn play_roulette() -> usize {
+fn spin_table() -> usize {
     let mut rng = rand::thread_rng();
     return rng.gen_range(1..=37);
 }
 
-fn verify_colour() -> usize {
-    return 0;
+fn play_colour() {
 }
 
-fn verify_parity() -> usize {
-    return 0;
+fn play_parity() {
 }
 
-fn verify_range() -> usize {
-    return 0;
+fn play_range() {
 }
 
-fn verify_dozen() -> usize {
-    return 0;
+fn play_dozen() {
 }
 
-fn verify_column() -> usize {
-    return 0;
+fn play_column() {
 }
 
-fn verify_number() -> usize {
+fn play_number() {
     println!("Place your bet for roulette, 0, 00, and 1-36 are the numbers"); // Prompt the user for input
     let mut guess = String::new(); // Create a new mutable string
     io::stdin()
@@ -81,12 +64,22 @@ fn verify_number() -> usize {
             process::exit(1);
         }
     };
+
     // don't need to check if less than 0 because it's a usize
     if guess > 37 {
         eprintln!("ERROR: Your guess must be between 0 and 36, or 00"); // Handle invalid input
         process::exit(1);
     }
-    guess
+    
+    println!("You bet on: {}", colour_print(guess)); // Print the user's guess
+    let result = spin_table();
+    // let colour: usize = get_colour(result);
+    println!("Result: {}", colour_print(result));
+    if result == 1 {
+        println!("YOU WIN!");
+    } else {
+        println!("Sorry, you lost");
+    }
 }
 
 // TODO
