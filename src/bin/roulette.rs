@@ -3,6 +3,66 @@ use std::io; // For accessing command line arguments
 use std::process; // For terminating the program
 
 fn main() {
+    println!("What would you like to bet on? Colour (c), Parity (Even/Odd) (p), 1-18/19-36 (h), Dozen (d), Column (co), or Number (n)?");
+
+    let mut choice = String::new();
+    io::stdin()
+        .read_line(&mut choice)
+        .expect("Failed to read line");
+    choice = choice.trim().to_lowercase();
+
+    let guess = match choice.as_str() {
+        "c" => play_colour(),
+        "p" => play_parity(),
+        "h" => play_range(),
+        "d" => play_dozen(),
+        "co" => play_column(),
+        "n" => play_number(),
+        _ => {
+            println!("Invalid choice");
+            0
+        }
+    };
+
+    println!("Your guess: {}", guess);
+
+    let result = play_roulette();
+    let colour = get_colour(result);
+    println!("Result: {} {}", to_colour(colour), result);
+
+    if guess == result {
+        println!("YOU WIN!"); // User guessed correctly
+    } else {
+        println!("Sorry, you lost");
+    }
+}
+
+fn play_roulette() -> usize {
+    let mut rng = rand::thread_rng();
+    return rng.gen_range(1..=37);
+}
+
+fn play_colour() -> usize {
+    return 0;
+}
+
+fn play_parity() -> usize {
+    return 0;
+}
+
+fn play_range() -> usize {
+    return 0;
+}
+
+fn play_dozen() -> usize {
+    return 0;
+}
+
+fn play_column() -> usize {
+    return 0;
+}
+
+fn play_number() -> usize {
     println!("Place your bet for roulette, 0, 00, and 1-36 are the numbers"); // Prompt the user for input
     let mut guess = String::new(); // Create a new mutable string
     io::stdin()
@@ -19,31 +79,28 @@ fn main() {
             process::exit(1);
         }
     };
-    println!("You guessed: {} {}", to_colour(get_colour(guess)), guess); // Print the user's guess
     // don't need to check if less than 0 because it's a usize
     if guess > 37 {
         eprintln!("ERROR: Your guess must be between 0 and 36, or 00"); // Handle invalid input
         process::exit(1);
     }
-
-    let result = play_roulette();
-    let colour = get_colour(result);
-
-    if guess == result {
-        println!("YOU WIN!"); // User guessed correctly
-    } else {
-        println!("Sorry, you lost, it landed on {} {}", to_colour(colour), result);
-    }
+    println!("You guessed: {} {}", to_colour(get_colour(guess)), guess); // Print the user's guess
+    guess
 }
 
-fn play_roulette() -> usize {
-    let mut rng = rand::thread_rng();
-    return rng.gen_range(1..=37);
-}
+// TODO
+// - Even or Odd - use %
+// - 1-18 or 19-36
+// - Dozen - 1-12, 13-24, 25-36
+// - Column - 1st, 2nd, 3rd
+// - then implement betting with a balance
+// - then implement multiple bets
 
 // 0 = black, 1 = red, 2 = green
 fn get_colour(num: usize) -> usize {
-    let red = [32, 19, 21, 25, 34, 27, 36, 30, 23, 5, 16, 1, 14, 9, 18, 7, 12, 3];
+    let red = [
+        32, 19, 21, 25, 34, 27, 36, 30, 23, 5, 16, 1, 14, 9, 18, 7, 12, 3,
+    ];
 
     if num == 0 || num == 37 {
         return 2;
