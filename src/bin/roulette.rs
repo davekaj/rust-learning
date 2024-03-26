@@ -1,11 +1,11 @@
 use colored::*;
 use rand::Rng; // Import Rng trait for random number generation
 use std::io; // For accessing command line arguments
-use std::process; // For terminating the program // For coloured text
+use std::process; // For terminating the program // For colored text
 
 fn main() {
     print_roulette_table();
-    println!("What would you like to bet on? \n - Colour (c)\n - Parity (Even/Odd) (p)\n - 1-18/19-36 (h)\n - Dozen (d)\n - Column (co)\n - Number (n)");
+    println!("What would you like to bet on? \n - color (c)\n - Parity (Even/Odd) (p)\n - 1-18/19-36 (h)\n - Dozen (d)\n - Column (co)\n - Number (n)");
 
     let mut choice = String::new();
     io::stdin()
@@ -14,7 +14,7 @@ fn main() {
     choice = choice.trim().to_lowercase();
 
     match choice.as_str() {
-        "c" => play_colour(),
+        "c" => play_color(),
         "p" => play_parity(),
         "h" => play_range(),
         "d" => play_dozen(),
@@ -31,7 +31,7 @@ fn spin_table() -> usize {
     return rng.gen_range(1..=37);
 }
 
-fn play_colour() {
+fn play_color() {
     println!("Choose Red (r) or Black (b)"); // Prompt the user for input
     let mut guess = String::new(); // Create a new mutable string
     io::stdin()
@@ -44,14 +44,14 @@ fn play_colour() {
     } else if guess == "b" {
         println!("{}", "You bet on black!".black());
     } else {
-        eprintln!("ERROR: Please provide 'r' or 'b' for colour choice"); // Handle invalid input
+        eprintln!("ERROR: Please provide 'r' or 'b' for color choice"); // Handle invalid input
         process::exit(1);
     }
 
     let result = spin_table();
-    let result_colour = get_colour(result);
-    println!("Result: {}", colour_print(result));
-    if result_colour == guess {
+    let result_color = get_color(result);
+    println!("Result: {}", color_print(result));
+    if result_color == guess {
         println!("{}", "YOU WIN!".green());
     } else {
         println!("{}", "Sorry, you lost.".red());
@@ -90,9 +90,9 @@ fn play_number() {
         process::exit(1);
     }
 
-    println!("You bet on: {}", colour_print(guess)); // Print the user's guess
+    println!("You bet on: {}", color_print(guess)); // Print the user's guess
     let result = spin_table();
-    println!("Result: {}", colour_print(result));
+    println!("Result: {}", color_print(result));
     if result == 1 {
         println!("YOU WIN!");
     } else {
@@ -109,7 +109,7 @@ fn play_number() {
 // - then implement multiple bets
 
 // 0 = black, 1 = red, 2 = green
-fn get_colour(num: usize) -> String {
+fn get_color(num: usize) -> String {
     let red = [
         1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
     ];
@@ -125,9 +125,9 @@ fn get_colour(num: usize) -> String {
     }
 }
 
-fn colour_print(num: usize) -> ColoredString {
-    let colour = get_colour(num); // Assuming `get_colour` function is defined elsewhere
-    match colour.as_str() {
+fn color_print(num: usize) -> ColoredString {
+    let color = get_color(num); // Assuming `get_color` function is defined elsewhere
+    match color.as_str() {
         "b" => ColoredString::from(format!("{} {}", "Black".black(), num.to_string().black())),
         "r" => ColoredString::from(format!("{} {}", "Red".red(), num.to_string().red())),
         "g" => {
@@ -137,7 +137,7 @@ fn colour_print(num: usize) -> ColoredString {
                 return ColoredString::from(format!("{} {}", "Green".green(), "0".green()));
             }
         }
-        _ => ColoredString::from(format!("Invalid colour: {}", num)),
+        _ => ColoredString::from(format!("Invalid color: {}", num)),
     }
 }
 
