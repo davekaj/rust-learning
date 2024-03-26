@@ -1,10 +1,11 @@
+use colored::*;
 use rand::Rng; // Import Rng trait for random number generation
 use std::io; // For accessing command line arguments
-use std::process; // For terminating the program
-use colored::*; // For coloured text
+use std::process; // For terminating the program // For coloured text
 
 fn main() {
-    println!("What would you like to bet on? Colour (c), Parity (Even/Odd) (p), 1-18/19-36 (h), Dozen (d), Column (co), or Number (n)?");
+    print_roulette_table();
+    println!("What would you like to bet on? \n - Colour (c)\n - Parity (Even/Odd) (p)\n - 1-18/19-36 (h)\n - Dozen (d)\n - Column (co)\n - Number (n)");
 
     let mut choice = String::new();
     io::stdin()
@@ -121,4 +122,88 @@ fn colour_print(num: usize) -> ColoredString {
         2 => ColoredString::from(format!("{} {}", "Green".green(), num.to_string().green())),
         _ => ColoredString::from(format!("Invalid colour: {}", num)),
     }
+}
+
+fn colorize(number: u32) -> ColoredString {
+    match number {
+        1 | 3 | 5 | 7 | 9 | 12 | 14 | 16 | 18 | 19 | 21 | 23 | 25 | 27 | 30 | 32 | 34 | 36 => {
+            number.to_string().red()
+        }
+        2 | 4 | 6 | 8 | 10 | 11 | 13 | 15 | 17 | 20 | 22 | 24 | 26 | 28 | 29 | 31 | 33 | 35 => {
+            number.to_string().black()
+        }
+        _ => number.to_string().green(), // This will catch 0 and 00, but they're already handled outside this function.
+    }
+}
+
+
+fn print_roulette_table() {
+    println!("\n  Welcome to the roulette table!\n");
+    println!(
+        "\t+-------+------+\n\
+         \t|   {}   |  {}  |\n\
+         \t+----+----+----+\n\
+         \t|  {} |  {} |  {} |\n\
+         \t+----+----+----+\n\
+         \t|  {} |  {} |  {} |\n\
+         \t+----+----+----+\n\
+         \t|  {} |  {} |  {} |\n\
+         \t+----+----+----+\n\
+         \t| {} | {} | {} |\n\
+         \t+----+----+----+\n\
+         \t| {} | {} | {} |\n\
+         \t+----+----+----+\n\
+         \t| {} | {} | {} |\n\
+         \t+----+----+----+\n\
+         \t| {} | {} | {} |\n\
+         \t+----+----+----+\n\
+         \t| {} | {} | {} |\n\
+         \t+----+----+----+\n\
+         \t| {} | {} | {} |\n\
+         \t+----+----+----+\n\
+         \t| {} | {} | {} |\n\
+         \t+----+----+----+\n\
+         \t| {} | {} | {} |\n\
+         \t+----+----+----+\n\
+         \t| {} | {} | {} |\n\
+         \t+----+----+----+\n",
+        "0".green(),
+        "00".green(),
+        colorize(1),
+        colorize(2),
+        colorize(3),
+        colorize(4),
+        colorize(5),
+        colorize(6),
+        colorize(7),
+        colorize(8),
+        colorize(9),
+        colorize(10),
+        colorize(11),
+        colorize(12),
+        colorize(13),
+        colorize(14),
+        colorize(15),
+        colorize(16),
+        colorize(17),
+        colorize(18),
+        colorize(19),
+        colorize(20),
+        colorize(21),
+        colorize(22),
+        colorize(23),
+        colorize(24),
+        colorize(25),
+        colorize(26),
+        colorize(27),
+        colorize(28),
+        colorize(29),
+        colorize(30),
+        colorize(31),
+        colorize(32),
+        colorize(33),
+        colorize(34),
+        colorize(35),
+        colorize(36)
+    );
 }
