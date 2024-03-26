@@ -1,6 +1,7 @@
 use rand::Rng; // Import Rng trait for random number generation
 use std::io; // For accessing command line arguments
 use std::process; // For terminating the program
+use colored::*; // For coloured text
 
 fn main() {
     println!("What would you like to bet on? Colour (c), Parity (Even/Odd) (p), 1-18/19-36 (h), Dozen (d), Column (co), or Number (n)?");
@@ -12,23 +13,23 @@ fn main() {
     choice = choice.trim().to_lowercase();
 
     let guess = match choice.as_str() {
-        "c" => play_colour(),
-        "p" => play_parity(),
-        "h" => play_range(),
-        "d" => play_dozen(),
-        "co" => play_column(),
-        "n" => play_number(),
+        "c" => verify_colour(),
+        "p" => verify_parity(),
+        "h" => verify_range(),
+        "d" => verify_dozen(),
+        "co" => verify_column(),
+        "n" => verify_number(),
         _ => {
             println!("Invalid choice");
             0
         }
     };
 
-    println!("Your guess: {}", guess);
+    println!("You guessed: {}", colour_print(guess)); // Print the user's guess
 
     let result = play_roulette();
-    let colour = get_colour(result);
-    println!("Result: {} {}", to_colour(colour), result);
+    let colour: usize = get_colour(result);
+    println!("Result: {}", colour_print(result));
 
     if guess == result {
         println!("YOU WIN!"); // User guessed correctly
@@ -42,27 +43,27 @@ fn play_roulette() -> usize {
     return rng.gen_range(1..=37);
 }
 
-fn play_colour() -> usize {
+fn verify_colour() -> usize {
     return 0;
 }
 
-fn play_parity() -> usize {
+fn verify_parity() -> usize {
     return 0;
 }
 
-fn play_range() -> usize {
+fn verify_range() -> usize {
     return 0;
 }
 
-fn play_dozen() -> usize {
+fn verify_dozen() -> usize {
     return 0;
 }
 
-fn play_column() -> usize {
+fn verify_column() -> usize {
     return 0;
 }
 
-fn play_number() -> usize {
+fn verify_number() -> usize {
     println!("Place your bet for roulette, 0, 00, and 1-36 are the numbers"); // Prompt the user for input
     let mut guess = String::new(); // Create a new mutable string
     io::stdin()
@@ -84,7 +85,6 @@ fn play_number() -> usize {
         eprintln!("ERROR: Your guess must be between 0 and 36, or 00"); // Handle invalid input
         process::exit(1);
     }
-    println!("You guessed: {} {}", to_colour(get_colour(guess)), guess); // Print the user's guess
     guess
 }
 
@@ -113,11 +113,12 @@ fn get_colour(num: usize) -> usize {
     }
 }
 
-fn to_colour(num: usize) -> String {
-    match num {
-        0 => "Black".to_string(),
-        1 => "Red".to_string(),
-        2 => "Green".to_string(),
-        _ => panic!("Invalid colour: {}", num),
+fn colour_print(num: usize) -> ColoredString {
+    let colour = get_colour(num); // Assuming `get_colour` function is defined elsewhere
+    match colour {
+        0 => ColoredString::from(format!("{} {}", "Black".black(), num.to_string().black())),
+        1 => ColoredString::from(format!("{} {}", "Red".red(), num.to_string().red())),
+        2 => ColoredString::from(format!("{} {}", "Green".green(), num.to_string().green())),
+        _ => ColoredString::from(format!("Invalid colour: {}", num)),
     }
 }
