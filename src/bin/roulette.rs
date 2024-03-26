@@ -22,7 +22,6 @@ fn main() {
         "n" => play_number(),
         _ => {
             println!("Invalid choice");
-            0
         }
     };
 }
@@ -33,19 +32,39 @@ fn spin_table() -> usize {
 }
 
 fn play_colour() {
+    println!("Choose Red (r) or Black (b)"); // Prompt the user for input
+    let mut guess = String::new(); // Create a new mutable string
+    io::stdin()
+        .read_line(&mut guess) // Read the user's input
+        .expect("Failed to read line"); // Handle any errors
+
+    let guess = guess.trim(); // Trim the whitespace from the input
+    if guess == "r" {
+        println!("{}", "You bet on red!".red());
+    } else if guess == "b" {
+        println!("{}", "You bet on black!".black());
+    } else {
+        eprintln!("ERROR: Please provide 'r' or 'b' for colour choice"); // Handle invalid input
+        process::exit(1);
+    }
+
+    let result = spin_table();
+    let result_colour = get_colour(result);
+    println!("Result: {}", colour_print(result));
+    if result_colour == guess {
+        println!("{}", "YOU WIN!".green());
+    } else {
+        println!("{}", "Sorry, you lost.".red());
+    }
 }
 
-fn play_parity() {
-}
+fn play_parity() {}
 
-fn play_range() {
-}
+fn play_range() {}
 
-fn play_dozen() {
-}
+fn play_dozen() {}
 
-fn play_column() {
-}
+fn play_column() {}
 
 fn play_number() {
     println!("Place your bet for roulette, 0, 00, and 1-36 are the numbers"); // Prompt the user for input
@@ -70,10 +89,9 @@ fn play_number() {
         eprintln!("ERROR: Your guess must be between 0 and 36, or 00"); // Handle invalid input
         process::exit(1);
     }
-    
+
     println!("You bet on: {}", colour_print(guess)); // Print the user's guess
     let result = spin_table();
-    // let colour: usize = get_colour(result);
     println!("Result: {}", colour_print(result));
     if result == 1 {
         println!("YOU WIN!");
@@ -91,17 +109,17 @@ fn play_number() {
 // - then implement multiple bets
 
 // 0 = black, 1 = red, 2 = green
-fn get_colour(num: usize) -> usize {
+fn get_colour(num: usize) -> String {
     let red = [
-        32, 19, 21, 25, 34, 27, 36, 30, 23, 5, 16, 1, 14, 9, 18, 7, 12, 3,
+        1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
     ];
 
     if num == 0 || num == 37 {
-        return 2;
+        return "g".to_string();
     } else if red.contains(&num) {
-        return 1;
+        return "r".to_string();
     } else if num <= 37 {
-        return 0;
+        return "b".to_string();
     } else {
         panic!("Invalid number: {}", num);
     }
@@ -109,10 +127,16 @@ fn get_colour(num: usize) -> usize {
 
 fn colour_print(num: usize) -> ColoredString {
     let colour = get_colour(num); // Assuming `get_colour` function is defined elsewhere
-    match colour {
-        0 => ColoredString::from(format!("{} {}", "Black".black(), num.to_string().black())),
-        1 => ColoredString::from(format!("{} {}", "Red".red(), num.to_string().red())),
-        2 => ColoredString::from(format!("{} {}", "Green".green(), num.to_string().green())),
+    match colour.as_str() {
+        "b" => ColoredString::from(format!("{} {}", "Black".black(), num.to_string().black())),
+        "r" => ColoredString::from(format!("{} {}", "Red".red(), num.to_string().red())),
+        "g" => {
+            if num == 37 {
+                return ColoredString::from(format!("{} {}", "Green".green(), "00".green()));
+            } else {
+                return ColoredString::from(format!("{} {}", "Green".green(), "0".green()));
+            }
+        }
         _ => ColoredString::from(format!("Invalid colour: {}", num)),
     }
 }
@@ -128,7 +152,6 @@ fn colorize(number: u32) -> ColoredString {
         _ => number.to_string().green(), // This will catch 0 and 00, but they're already handled outside this function.
     }
 }
-
 
 fn print_roulette_table() {
     println!("\n  Welcome to the roulette table!\n");
