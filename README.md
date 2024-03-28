@@ -6,7 +6,8 @@ Starting off building a bunch of casino games. They are well defined games, wher
 It would actually be a great idea to use this exact concept to learn any new language. If I want to learn Clojure after Rust, then I already have all the Rust examples, and I can use it as a reference
 
 ## TODO
-- [ ] Finish Roulette
+- [ ] Finish Roulette plays
+- [ ] Add in betting
 - [ ] Do tests for each game
 
 Then add more functionality to blackjack, add a new game, or do something else.

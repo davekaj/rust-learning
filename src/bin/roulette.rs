@@ -35,7 +35,7 @@ fn play_color() {
     println!("Choose Red (r) or Black (b)");
     let mut guess = String::new();
     io::stdin()
-        .read_line(&mut guess) 
+        .read_line(&mut guess)
         .expect("Failed to read line");
 
     let guess = guess.trim();
@@ -107,14 +107,47 @@ fn play_dozen() {
 
     let result = spin_table();
     println!("Result: {}", color_print(result));
-    if (guess == 1 && result <= 12) || (guess == 2 && result > 12 && result <= 24) || (guess == 3 && result > 24) {
+    if (guess == 1 && result <= 12)
+        || (guess == 2 && result > 12 && result <= 24)
+        || (guess == 3 && result > 24)
+    {
         println!("YOU WIN!");
     } else {
         println!("Sorry, you lost");
     }
 }
 
-fn play_column() {}
+fn play_column() {
+    println!("Choose 1st (1), 2nd (2), or 3rd (3) column (see the ASCII art roulette table)");
+    let mut guess = String::new();
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    let guess: usize = match guess.trim().parse() {
+        Ok(num) => num,
+        Err(_) => {
+            eprintln!("ERROR: Please provide a positive integer as a guess."); // Handle invalid input
+            process::exit(1);
+        }
+    };
+
+    if guess < 1 || guess > 3 {
+        eprintln!("ERROR: Your guess must be between 1 and 3"); // Handle invalid input
+        process::exit(1);
+    }
+
+    let result = spin_table();
+    println!("Result: {}", color_print(result));
+    if (guess == 1 && result % 3 == 1)
+        || (guess == 2 && result % 3 == 2)
+        || (guess == 3 && result % 3 == 0)
+    {
+        println!("YOU WIN!");
+    } else {
+        println!("Sorry, you lost");
+    }
+}
 
 fn play_number() {
     println!("Place your bet for roulette, 0, 00, and 1-36 are the numbers"); // Prompt the user for input
@@ -149,14 +182,6 @@ fn play_number() {
         println!("Sorry, you lost");
     }
 }
-
-// TODO
-// - Even or Odd - use %
-// - 1-18 or 19-36
-// - Dozen - 1-12, 13-24, 25-36
-// - Column - 1st, 2nd, 3rd
-// - then implement betting with a balance
-// - then implement multiple bets
 
 // 0 = black, 1 = red, 2 = green
 fn get_color(num: usize) -> String {
