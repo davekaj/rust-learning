@@ -16,7 +16,6 @@ fn main() {
     match choice.as_str() {
         "c" => play_color(),
         "p" => play_parity(),
-        "h" => play_range(),
         "d" => play_dozen(),
         "co" => play_column(),
         "n" => play_number(),
@@ -86,9 +85,34 @@ fn play_parity() {
     }
 }
 
-fn play_range() {}
+fn play_dozen() {
+    println!("Choose 1-12 (1), 13-24 (2), or 25-36 (3)");
+    let mut guess = String::new();
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
 
-fn play_dozen() {}
+    let guess: usize = match guess.trim().parse() {
+        Ok(num) => num,
+        Err(_) => {
+            eprintln!("ERROR: Please provide a positive integer as a guess."); // Handle invalid input
+            process::exit(1);
+        }
+    };
+
+    if guess < 1 || guess > 3 {
+        eprintln!("ERROR: Your guess must be between 1 and 3"); // Handle invalid input
+        process::exit(1);
+    }
+
+    let result = spin_table();
+    println!("Result: {}", color_print(result));
+    if (guess == 1 && result <= 12) || (guess == 2 && result > 12 && result <= 24) || (guess == 3 && result > 24) {
+        println!("YOU WIN!");
+    } else {
+        println!("Sorry, you lost");
+    }
+}
 
 fn play_column() {}
 
