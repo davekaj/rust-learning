@@ -7,7 +7,8 @@ It would actually be a great idea to use this exact concept to learn any new lan
 
 ## TODO
 - [x] Finish Roulette plays
-- [ ] refactor
+- [x] Refactor
+- [ ] Handle errors to ask again for input
 - [ ] Add in betting
 - [ ] Do tests for each game
 

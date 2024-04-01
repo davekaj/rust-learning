@@ -3,6 +3,19 @@ use rand::Rng; // Import Rng trait for random number generation
 use std::io; // For accessing command line arguments
 use std::process; // For terminating the program // For colored text
 
+const ZERO: &str = "0";
+const DOUBLE_ZERO: &str = "00";
+const THIRTY_SEVEN: &str = "37";
+const ZERO_OR_DOUBLE: usize = 0;
+const RED: usize = 1;
+const BLACK: usize = 2;
+const EVEN: usize = 1;
+const ODD: usize = 2;
+
+const RED_NUMBERS: [usize; 18] = [
+    1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
+];
+
 fn main() {
     print_roulette_table();
     println!("Welcome to the roulette table!");
@@ -113,8 +126,8 @@ fn get_valid_input(min: usize, max: usize, bet_00: bool) -> usize {
         .read_line(&mut guess)
         .expect("Failed to read line");
 
-    if bet_00 && guess.trim() == "00".to_string() {
-        guess = "37".to_string(); // Treat 00 as 37
+    if bet_00 && guess.trim() == DOUBLE_ZERO.to_string() {
+        guess = THIRTY_SEVEN.to_string(); // Treat 00 as 37
     }
 
     let guess: usize = match guess.trim().parse() {
@@ -135,11 +148,11 @@ fn get_valid_input(min: usize, max: usize, bet_00: bool) -> usize {
 
 fn get_parity(num: usize) -> usize {
     if num == 0 || num == 37 {
-        return 0;
+        return ZERO_OR_DOUBLE;
     } else if num % 2 == 0 {
-        return 1;
+        return EVEN;
     } else if num % 2 == 1 {
-        return 2;
+        return ODD;
     } else {
         panic!("Invalid number: {}", num);
     }
@@ -147,30 +160,22 @@ fn get_parity(num: usize) -> usize {
 
 // 0 = green, 1 = red, 2 = black
 fn get_color_num(num: usize) -> usize {
-    let red = [
-        1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
-    ];
-
     if num == 0 || num == 37 {
-        return 0;
-    } else if red.contains(&num) {
-        return 1;
+        return ZERO_OR_DOUBLE;
+    } else if RED_NUMBERS.contains(&num) {
+        return RED;
     } else if num <= 37 {
-        return 2;
+        return BLACK;
     } else {
         panic!("Invalid number: {}", num);
     }
 }
 
 fn colorize_number(num: usize) -> ColoredString {
-    let red_numbers = [
-        1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
-    ];
-
     match num {
-        0 => "0".green().to_string().into(), // colorize_number "0" as green.
-        37 => "00".green().to_string().into(), // Special handling for "00" to display it correctly.
-        _ if red_numbers.contains(&num) => format!("{}", num.to_string().red()).into(),
+        0 => ZERO.green(), // colorize_number "0" as green.
+        37 => DOUBLE_ZERO.green(), // Special handling for "00" to display it correctly.
+        _ if RED_NUMBERS.contains(&num) => format!("{}", num.to_string().red()).into(),
         _ => format!("{}", num.to_string().black()).into(),
     }
 }
@@ -205,8 +210,8 @@ fn print_roulette_table() {
          \t+----+----+----+\n\
          \t| {} | {} | {} |\n\
          \t+----+----+----+\n",
-        "0".green(),
-        "00".green(),
+        ZERO.green(),
+        DOUBLE_ZERO.green(),
         colorize_number(1),
         colorize_number(2),
         colorize_number(3),
