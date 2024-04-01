@@ -30,27 +30,19 @@ fn spin_table() -> usize {
     let mut rng = rand::thread_rng();
     return rng.gen_range(1..=37);
     // return 37;
+    // return 0;
 }
 
 fn play_color() {
-    println!("Choose Red (r) or Black (b)");
-    let mut guess = String::new();
-    io::stdin()
-        .read_line(&mut guess)
-        .expect("Failed to read line");
-
-    let guess = guess.trim();
-    if guess == "r" {
+    println!("Choose Red (1) or Black (2)");
+    let guess = get_valid_input(1, 2, false);
+    if guess == 1 {
         println!("{}", "You bet on red!".red());
-    } else if guess == "b" {
+    } else if guess == 2 {
         println!("{}", "You bet on black!".black());
-    } else {
-        eprintln!("ERROR: Please provide 'r' or 'b' for color choice");
-        process::exit(1);
     }
-
     let result = spin_table();
-    let result_color = get_color(result);
+    let result_color = get_color_num(result);
     println!("Result: {}", color_print(result));
     if result_color == guess {
         println!("{}", "YOU WIN!".green());
@@ -60,22 +52,16 @@ fn play_color() {
 }
 
 fn play_parity() {
-    println!("Choose Even (e) or Odd (o)");
-    let mut guess = String::new();
-    io::stdin()
-        .read_line(&mut guess)
-        .expect("Failed to read line");
-
-    let guess = guess.trim();
-    if guess == "e" {
+    println!("Choose Even (1) or Odd (2)");
+    let guess = get_valid_input(1, 2, false);
+    if guess == 1 {
         println!("You bet on Even!");
-    } else if guess == "o" {
+    } else if guess == 2 {
         println!("You bet on Odd!");
     } else {
-        eprintln!("ERROR: Please provide 'e' or 'o' for parity choice");
+        eprintln!("ERROR: Please provide 1 or 2 for parity choice");
         process::exit(1);
     }
-
     let result = spin_table();
     let result_parity = get_parity(result);
     println!("Result: {}", color_print(result));
@@ -88,24 +74,7 @@ fn play_parity() {
 
 fn play_dozen() {
     println!("Choose 1-12 (1), 13-24 (2), or 25-36 (3)");
-    let mut guess = String::new();
-    io::stdin()
-        .read_line(&mut guess)
-        .expect("Failed to read line");
-
-    let guess: usize = match guess.trim().parse() {
-        Ok(num) => num,
-        Err(_) => {
-            eprintln!("ERROR: Please provide a positive integer as a guess."); // Handle invalid input
-            process::exit(1);
-        }
-    };
-
-    if guess < 1 || guess > 3 {
-        eprintln!("ERROR: Your guess must be between 1 and 3"); // Handle invalid input
-        process::exit(1);
-    }
-
+    let guess = get_valid_input(1, 3, false);
     let result = spin_table();
     println!("Result: {}", color_print(result));
     if (guess == 1 && result <= 12)
@@ -120,24 +89,7 @@ fn play_dozen() {
 
 fn play_half() {
     println!("Choose 1-18 (1) or 19-36 (2)");
-    let mut guess = String::new();
-    io::stdin()
-        .read_line(&mut guess)
-        .expect("Failed to read line");
-
-    let guess: usize = match guess.trim().parse() {
-        Ok(num) => num,
-        Err(_) => {
-            eprintln!("ERROR: Please provide a positive integer as a guess."); // Handle invalid input
-            process::exit(1);
-        }
-    };
-
-    if guess < 1 || guess > 2 {
-        eprintln!("ERROR: Your guess must be between 1 and 2"); // Handle invalid input
-        process::exit(1);
-    }
-
+    let guess = get_valid_input(1, 2, false);
     let result = spin_table();
     println!("Result: {}", color_print(result));
     if (guess == 1 && result <= 18) || (guess == 2 && result > 18) {
@@ -149,24 +101,7 @@ fn play_half() {
 
 fn play_column() {
     println!("Choose 1st (1), 2nd (2), or 3rd (3) column (see the ASCII art roulette table)");
-    let mut guess = String::new();
-    io::stdin()
-        .read_line(&mut guess)
-        .expect("Failed to read line");
-
-    let guess: usize = match guess.trim().parse() {
-        Ok(num) => num,
-        Err(_) => {
-            eprintln!("ERROR: Please provide a positive integer as a guess."); // Handle invalid input
-            process::exit(1);
-        }
-    };
-
-    if guess < 1 || guess > 3 {
-        eprintln!("ERROR: Your guess must be between 1 and 3"); // Handle invalid input
-        process::exit(1);
-    }
-
+    let guess = get_valid_input(1, 3, false);
     let result = spin_table();
     println!("Result: {}", color_print(result));
     if (guess == 1 && result % 3 == 1)
@@ -180,12 +115,30 @@ fn play_column() {
 }
 
 fn play_number() {
-    println!("Place your bet for roulette, 0, 00, and 1-36 are the numbers"); // Prompt the user for input
-    let mut guess = String::new(); // Create a new mutable string
+    println!("Place your bet for roulette, 0, 00, and 1-36 are the numbers");
+    // NOTE - user can technically pass 37 in the CLI, not desireable but it is OK. 00 == 37
+    let guess = get_valid_input(0, 37, true);
+    println!("You bet on: {}", color_print(guess)); // Print the user's guess
+    let result = spin_table();
+    println!("Result: {}", color_print(result));
+    if result == guess {
+        println!("YOU WIN!");
+    } else {
+        println!("Sorry, you lost");
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////// HELPER FUNCTIONS /////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+fn get_valid_input(min: usize, max: usize, bet_00: bool) -> usize {
+    let mut guess = String::new();
     io::stdin()
-        .read_line(&mut guess) // Read the user's input
-        .expect("failed to read line"); // Handle any errors
-    if guess == "00".to_string() {
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    if bet_00 && guess.trim() == "00".to_string() {
         guess = "37".to_string(); // Treat 00 as 37
     }
 
@@ -197,61 +150,49 @@ fn play_number() {
         }
     };
 
-    // don't need to check if less than 0 because it's a usize
-    if guess > 37 {
-        eprintln!("ERROR: Your guess must be between 0 and 36, or 00"); // Handle invalid input
+    if guess < min || guess > max {
+        eprintln!("ERROR: Your guess must be between {} and {}", min, max);
         process::exit(1);
     }
 
-    println!("You bet on: {}", color_print(guess)); // Print the user's guess
-    let result = spin_table();
-    println!("Result: {}", color_print(result));
-    if result == 1 {
-        println!("YOU WIN!");
-    } else {
-        println!("Sorry, you lost");
-    }
+    return guess;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////// HELPER FUNCTIONS /////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// 0 = black, 1 = red, 2 = green
-fn get_color(num: usize) -> String {
+// 0 = green, 1 = red, 2 = black
+fn get_color_num(num: usize) -> usize {
     let red = [
         1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
     ];
 
     if num == 0 || num == 37 {
-        return "g".to_string();
+        return 0;
     } else if red.contains(&num) {
-        return "r".to_string();
+        return 1;
     } else if num <= 37 {
-        return "b".to_string();
+        return 2;
     } else {
         panic!("Invalid number: {}", num);
     }
 }
 
-fn get_parity(num: usize) -> String {
+fn get_parity(num: usize) -> usize {
     if num == 0 || num == 37 {
-        return "zeros".to_string();
+        return 0;
     } else if num % 2 == 0 {
-        return "e".to_string();
+        return 1;
     } else if num % 2 == 1 {
-        return "o".to_string();
+        return 2;
     } else {
         panic!("Invalid number: {}", num);
     }
 }
 
 fn color_print(num: usize) -> ColoredString {
-    let color = get_color(num); // Assuming `get_color` function is defined elsewhere
-    match color.as_str() {
-        "b" => ColoredString::from(format!("{} {}", "Black".black(), num.to_string().black())),
-        "r" => ColoredString::from(format!("{} {}", "Red".red(), num.to_string().red())),
-        "g" => {
+    let color = get_color_num(num); // Assuming `get_color` function is defined elsewhere
+    match color {
+        1 => ColoredString::from(format!("{} {}", "Red".red(), num.to_string().red())),
+        2 => ColoredString::from(format!("{} {}", "Black".black(), num.to_string().black())),
+        0 => {
             if num == 37 {
                 return ColoredString::from(format!("{} {}", "Green".green(), "00".green()));
             } else {
