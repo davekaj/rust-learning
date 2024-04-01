@@ -16,6 +16,7 @@ fn main() {
     match choice.as_str() {
         "c" => play_color(),
         "p" => play_parity(),
+        "h" => play_half(),
         "d" => play_dozen(),
         "co" => play_column(),
         "n" => play_number(),
@@ -117,6 +118,35 @@ fn play_dozen() {
     }
 }
 
+fn play_half() {
+    println!("Choose 1-18 (1) or 19-36 (2)");
+    let mut guess = String::new();
+    io::stdin()
+        .read_line(&mut guess)
+        .expect("Failed to read line");
+
+    let guess: usize = match guess.trim().parse() {
+        Ok(num) => num,
+        Err(_) => {
+            eprintln!("ERROR: Please provide a positive integer as a guess."); // Handle invalid input
+            process::exit(1);
+        }
+    };
+
+    if guess < 1 || guess > 2 {
+        eprintln!("ERROR: Your guess must be between 1 and 2"); // Handle invalid input
+        process::exit(1);
+    }
+
+    let result = spin_table();
+    println!("Result: {}", color_print(result));
+    if (guess == 1 && result <= 18) || (guess == 2 && result > 18) {
+        println!("YOU WIN!");
+    } else {
+        println!("Sorry, you lost");
+    }
+}
+
 fn play_column() {
     println!("Choose 1st (1), 2nd (2), or 3rd (3) column (see the ASCII art roulette table)");
     let mut guess = String::new();
@@ -182,6 +212,10 @@ fn play_number() {
         println!("Sorry, you lost");
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////// HELPER FUNCTIONS /////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // 0 = black, 1 = red, 2 = green
 fn get_color(num: usize) -> String {
