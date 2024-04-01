@@ -29,7 +29,9 @@ fn main() {
 
 fn spin_table() -> usize {
     let mut rng = rand::thread_rng();
-    return rng.gen_range(1..=37);
+    rng.gen_range(1..=37)
+
+    // For testing purposes, we uncomment these
     // return 37;
     // return 0;
 }
@@ -42,7 +44,7 @@ where
     println!("{}", prompt.yellow());
     let guess = validate_guess();
     let result = spin_table();
-    println!("Result: {}", color_print(result));
+    println!("Result: {}", colorize_number(result));
 
     if win_condition(guess, result) {
         println!("{}", "YOU WIN!".green());
@@ -160,31 +162,16 @@ fn get_color_num(num: usize) -> usize {
     }
 }
 
-fn color_print(num: usize) -> ColoredString {
-    let color = get_color_num(num); // Assuming `get_color` function is defined elsewhere
-    match color {
-        1 => ColoredString::from(format!("{} {}", "Red".red(), num.to_string().red())),
-        2 => ColoredString::from(format!("{} {}", "Black".black(), num.to_string().black())),
-        0 => {
-            if num == 37 {
-                return ColoredString::from(format!("{} {}", "Green".green(), "00".green()));
-            } else {
-                return ColoredString::from(format!("{} {}", "Green".green(), "0".green()));
-            }
-        }
-        _ => ColoredString::from(format!("Invalid color: {}", num)),
-    }
-}
+fn colorize_number(num: usize) -> ColoredString {
+    let red_numbers = [
+        1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
+    ];
 
-fn colorize(number: u32) -> ColoredString {
-    match number {
-        1 | 3 | 5 | 7 | 9 | 12 | 14 | 16 | 18 | 19 | 21 | 23 | 25 | 27 | 30 | 32 | 34 | 36 => {
-            number.to_string().red()
-        }
-        2 | 4 | 6 | 8 | 10 | 11 | 13 | 15 | 17 | 20 | 22 | 24 | 26 | 28 | 29 | 31 | 33 | 35 => {
-            number.to_string().black()
-        }
-        _ => number.to_string().green(), // This will catch 0 and 00, but they're already handled outside this function.
+    match num {
+        0 => "0".green().to_string().into(), // colorize_number "0" as green.
+        37 => "00".green().to_string().into(), // Special handling for "00" to display it correctly.
+        _ if red_numbers.contains(&num) => format!("{}", num.to_string().red()).into(),
+        _ => format!("{}", num.to_string().black()).into(),
     }
 }
 
@@ -220,41 +207,41 @@ fn print_roulette_table() {
          \t+----+----+----+\n",
         "0".green(),
         "00".green(),
-        colorize(1),
-        colorize(2),
-        colorize(3),
-        colorize(4),
-        colorize(5),
-        colorize(6),
-        colorize(7),
-        colorize(8),
-        colorize(9),
-        colorize(10),
-        colorize(11),
-        colorize(12),
-        colorize(13),
-        colorize(14),
-        colorize(15),
-        colorize(16),
-        colorize(17),
-        colorize(18),
-        colorize(19),
-        colorize(20),
-        colorize(21),
-        colorize(22),
-        colorize(23),
-        colorize(24),
-        colorize(25),
-        colorize(26),
-        colorize(27),
-        colorize(28),
-        colorize(29),
-        colorize(30),
-        colorize(31),
-        colorize(32),
-        colorize(33),
-        colorize(34),
-        colorize(35),
-        colorize(36)
+        colorize_number(1),
+        colorize_number(2),
+        colorize_number(3),
+        colorize_number(4),
+        colorize_number(5),
+        colorize_number(6),
+        colorize_number(7),
+        colorize_number(8),
+        colorize_number(9),
+        colorize_number(10),
+        colorize_number(11),
+        colorize_number(12),
+        colorize_number(13),
+        colorize_number(14),
+        colorize_number(15),
+        colorize_number(16),
+        colorize_number(17),
+        colorize_number(18),
+        colorize_number(19),
+        colorize_number(20),
+        colorize_number(21),
+        colorize_number(22),
+        colorize_number(23),
+        colorize_number(24),
+        colorize_number(25),
+        colorize_number(26),
+        colorize_number(27),
+        colorize_number(28),
+        colorize_number(29),
+        colorize_number(30),
+        colorize_number(31),
+        colorize_number(32),
+        colorize_number(33),
+        colorize_number(34),
+        colorize_number(35),
+        colorize_number(36)
     );
 }
