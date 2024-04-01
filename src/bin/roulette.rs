@@ -5,6 +5,7 @@ use std::process; // For terminating the program // For colored text
 
 fn main() {
     print_roulette_table();
+    println!("Welcome to the roulette table!");
     println!("What would you like to bet on? \n - Color (c)\n - Parity (Even/Odd) (p)\n - 1-18/19-36 (h)\n - Dozen (d)\n - Column (co)\n - Number (n)");
 
     let mut choice = String::new();
@@ -33,99 +34,71 @@ fn spin_table() -> usize {
     // return 0;
 }
 
-fn play_color() {
-    println!("Choose Red (1) or Black (2)");
-    let guess = get_valid_input(1, 2, false);
-    if guess == 1 {
-        println!("{}", "You bet on red!".red());
-    } else if guess == 2 {
-        println!("{}", "You bet on black!".black());
-    }
+fn play_roulette<G, W>(prompt: &str, validate_guess: G, win_condition: W)
+where
+    G: Fn() -> usize,
+    W: Fn(usize, usize) -> bool,
+{
+    println!("{}", prompt.yellow());
+    let guess = validate_guess();
     let result = spin_table();
-    let result_color = get_color_num(result);
     println!("Result: {}", color_print(result));
-    if result_color == guess {
+
+    if win_condition(guess, result) {
         println!("{}", "YOU WIN!".green());
     } else {
         println!("{}", "Sorry, you lost.".red());
     }
+}
+
+fn play_color() {
+    let validate_guess = || get_valid_input(1, 2, false);
+    let win_condition = |guess, result| get_color_num(result) == guess;
+    play_roulette("Bet on Red (1) or Black (2)", validate_guess, win_condition);
 }
 
 fn play_parity() {
-    println!("Choose Even (1) or Odd (2)");
-    let guess = get_valid_input(1, 2, false);
-    if guess == 1 {
-        println!("You bet on Even!");
-    } else if guess == 2 {
-        println!("You bet on Odd!");
-    } else {
-        eprintln!("ERROR: Please provide 1 or 2 for parity choice");
-        process::exit(1);
-    }
-    let result = spin_table();
-    let result_parity = get_parity(result);
-    println!("Result: {}", color_print(result));
-    if result_parity == guess {
-        println!("{}", "YOU WIN!".green());
-    } else {
-        println!("{}", "Sorry, you lost.".red());
-    }
-}
-
-fn play_dozen() {
-    println!("Choose 1-12 (1), 13-24 (2), or 25-36 (3)");
-    let guess = get_valid_input(1, 3, false);
-    let result = spin_table();
-    println!("Result: {}", color_print(result));
-    if (guess == 1 && result <= 12)
-        || (guess == 2 && result > 12 && result <= 24)
-        || (guess == 3 && result > 24)
-    {
-        println!("YOU WIN!");
-    } else {
-        println!("Sorry, you lost");
-    }
+    let validate_guess = || get_valid_input(1, 2, false);
+    let win_condition = |guess, result| get_parity(result) == guess;
+    play_roulette("Bet on Even (1) or Odd (2)", validate_guess, win_condition);
 }
 
 fn play_half() {
-    println!("Choose 1-18 (1) or 19-36 (2)");
-    let guess = get_valid_input(1, 2, false);
-    let result = spin_table();
-    println!("Result: {}", color_print(result));
-    if (guess == 1 && result <= 18) || (guess == 2 && result > 18) {
-        println!("YOU WIN!");
-    } else {
-        println!("Sorry, you lost");
-    }
+    let validate_guess = || get_valid_input(1, 2, false);
+    let win_condition = |guess, result| (guess == 1 && result <= 18) || (guess == 2 && result > 18);
+    play_roulette("Bet on 1-18 (1) or 19-36 (2)", validate_guess, win_condition);
+}
+
+fn play_dozen() {
+    let validate_guess = || get_valid_input(1, 3, false);
+    let win_condition = |guess, result| {
+        (guess == 1 && result <= 12)
+            || (guess == 2 && result > 12 && result <= 24)
+            || (guess == 3 && result > 24)
+    };
+    play_roulette("Bet on 1-12 (1), 13-24 (2), or 25-36 (3)", validate_guess, win_condition);
 }
 
 fn play_column() {
-    println!("Choose 1st (1), 2nd (2), or 3rd (3) column (see the ASCII art roulette table)");
-    let guess = get_valid_input(1, 3, false);
-    let result = spin_table();
-    println!("Result: {}", color_print(result));
-    if (guess == 1 && result % 3 == 1)
-        || (guess == 2 && result % 3 == 2)
-        || (guess == 3 && result % 3 == 0)
-    {
-        println!("YOU WIN!");
-    } else {
-        println!("Sorry, you lost");
-    }
+    let validate_guess = || get_valid_input(1, 3, false);
+    let win_condition = |guess, result| {
+        (guess == 1 && result % 3 == 1)
+            || (guess == 2 && result % 3 == 2)
+            || (guess == 3 && result % 3 == 0)
+    };
+    play_roulette(
+        "Bet on 1st (1), 2nd (2), or 3rd (3) column (see the ASCII art roulette table)",
+        validate_guess,
+        win_condition,
+    );
 }
 
 fn play_number() {
-    println!("Place your bet for roulette, 0, 00, and 1-36 are the numbers");
-    // NOTE - user can technically pass 37 in the CLI, not desireable but it is OK. 00 == 37
-    let guess = get_valid_input(0, 37, true);
-    println!("You bet on: {}", color_print(guess)); // Print the user's guess
-    let result = spin_table();
-    println!("Result: {}", color_print(result));
-    if result == guess {
-        println!("YOU WIN!");
-    } else {
-        println!("Sorry, you lost");
-    }
+    let validate_guess = || get_valid_input(0, 37, true);
+    let win_condition = |guess: usize, result: usize| -> bool {
+        guess == result
+    };
+    play_roulette("Bet on 0, 00, or 1 to 36", validate_guess, win_condition);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,6 +131,18 @@ fn get_valid_input(min: usize, max: usize, bet_00: bool) -> usize {
     return guess;
 }
 
+fn get_parity(num: usize) -> usize {
+    if num == 0 || num == 37 {
+        return 0;
+    } else if num % 2 == 0 {
+        return 1;
+    } else if num % 2 == 1 {
+        return 2;
+    } else {
+        panic!("Invalid number: {}", num);
+    }
+}
+
 // 0 = green, 1 = red, 2 = black
 fn get_color_num(num: usize) -> usize {
     let red = [
@@ -169,18 +154,6 @@ fn get_color_num(num: usize) -> usize {
     } else if red.contains(&num) {
         return 1;
     } else if num <= 37 {
-        return 2;
-    } else {
-        panic!("Invalid number: {}", num);
-    }
-}
-
-fn get_parity(num: usize) -> usize {
-    if num == 0 || num == 37 {
-        return 0;
-    } else if num % 2 == 0 {
-        return 1;
-    } else if num % 2 == 1 {
         return 2;
     } else {
         panic!("Invalid number: {}", num);
