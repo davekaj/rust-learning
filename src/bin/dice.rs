@@ -41,3 +41,22 @@ fn roll_dice() -> i32 {
     let die2 = rng.gen_range(1..=6); // Roll the second die (1-6)
     die1 + die2 // Return the sum of the two rolls
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    // Testing that the roll_dice function produces a valid total, over 1000 tries
+    fn roll_dice_produces_valid_total() {
+        let mut valid_range = true;
+        for _ in 0..1000 {
+            let total = roll_dice();
+            if !(2..=12).contains(&total) {
+                valid_range = false;
+                break;
+            }
+        }
+        assert!(valid_range, "roll_dice produced a total outside the valid range (2-12)");
+    }
+}
