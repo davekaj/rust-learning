@@ -8,8 +8,9 @@ It would actually be a great idea to use this exact concept to learn any new lan
 ## TODO
 - [x] Finish Roulette plays
 - [x] Refactor
-- [ ] Handle errors to ask again for input
+- [x] Handle errors to ask again for input
 - [ ] Add in betting
+- [ ] Add in commented code (in typical rust format)
 - [ ] Do tests for each game
 
 Then add more functionality to blackjack, add a new game, or do something else.
