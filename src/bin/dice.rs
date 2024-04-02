@@ -1,62 +1,47 @@
-use rand::Rng; // Import Rng trait for random number generation
-use std::io; // For accessing command line arguments
-use std::process; // For terminating the program
+use rand::Rng;
+use std::io;
 
 fn main() {
-    let total = roll_dice(); // Roll two dice and sum them
+    let total = roll_dice();
+    println!("Guess the total of two dice (2-12):");
 
     loop {
-        println!("Guess the total of two dice (2-12):"); // Prompt the user for input
-        let mut guess = String::new(); // Create a new mutable string
-
-        io::stdin()
-            .read_line(&mut guess) // Read the user's input
-            .expect("failed to read line"); // Handle any errors
-
-        let guess: i32 = match guess.trim().parse() {
-            Ok(num) => num,
-            Err(_) => {
-                eprintln!("ERROR: Please provide a number as a guess."); // Handle invalid input
-                process::exit(1);
+        match get_guess() {
+            Ok(guess) if guess == total => {
+                println!("YOU WIN!");
+                break;
             }
-        };
-
-        if guess < 2 || guess > 12 {
-            eprintln!("ERROR: Your guess must be between 2 and 12."); // Handle invalid input
-            process::exit(1);
-        }
-
-        if guess == total {
-            println!("YOU WIN!"); // User guessed correctly
-            break; // Exit the loop
-        } else {
-            println!("Sorry, that's not correct. Try again!"); // Incorrect guess, loop will continue
+            Ok(_) => println!("Sorry, that's not correct. Try again!"),
+            Err(e) => eprintln!("{}", e),
         }
     }
 }
 
 fn roll_dice() -> i32 {
-    let mut rng = rand::thread_rng(); // Get a random number generator
-    let die1 = rng.gen_range(1..=6); // Roll the first die (1-6)
-    let die2 = rng.gen_range(1..=6); // Roll the second die (1-6)
-    die1 + die2 // Return the sum of the two rolls
+    let mut rng = rand::thread_rng();
+    rng.gen_range(1..=6) + rng.gen_range(1..=6)
+}
+
+fn get_guess() -> Result<i32, &'static str> {
+    let mut guess_str = String::new();
+    if io::stdin().read_line(&mut guess_str).is_err() {
+        return Err("Failed to read line");
+    }
+    let guess: i32 = match guess_str.trim().parse() {
+        Ok(num) if (2..=12).contains(&num) => num,
+        _ => return Err("ERROR: Please provide a number as a guess between 2 and 12."),
+    };
+    Ok(guess)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
     #[test]
-    // Testing that the roll_dice function produces a valid total, over 1000 tries
     fn roll_dice_produces_valid_total() {
-        let mut valid_range = true;
         for _ in 0..1000 {
             let total = roll_dice();
-            if !(2..=12).contains(&total) {
-                valid_range = false;
-                break;
-            }
+            assert!((2..=12).contains(&total), "roll_dice produced an invalid total: {}", total);
         }
-        assert!(valid_range, "roll_dice produced a total outside the valid range (2-12)");
     }
 }
