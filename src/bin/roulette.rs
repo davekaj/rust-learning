@@ -1,6 +1,9 @@
 use colored::*;
 use rand::Rng;
 use std::io;
+use std::thread;
+use std::time::Duration;
+
 
 // Constants for better readability
 const ZERO: &str = "0";
@@ -17,15 +20,36 @@ const RED_NUMBERS: [usize; 18] = [
 
 fn main() {
     print_roulette_table();
-    println!("Welcome to the roulette table!");
-    loop {
+    let mut balance: i32 = 100; // Player starts with $100
+    println!(
+        "{}{}.",
+        "Welcome to the roulette table! To start you have $".green(),
+        balance.to_string().green()
+    );
+    while balance > 0 {
+        println!("How much would you like to bet?");
+        let mut bet_str = String::new();
+        io::stdin()
+            .read_line(&mut bet_str)
+            .expect("Failed to read line");
+        let bet: i32 = bet_str.trim().parse().unwrap_or(0);
+
+        if bet > balance || bet <= 0 {
+            println!(
+                "Invalid bet amount. You have ${}, and you tried to bet ${}.",
+                balance, bet
+            );
+            continue;
+        }
+
         println!("What would you like to bet on? \n - Color (c)\n - Parity (Even/Odd) (p)\n - 1-18/19-36 (h)\n - Dozen (d)\n - Column (co)\n - Number (n)");
         let mut choice = String::new();
         io::stdin()
             .read_line(&mut choice)
             .expect("Failed to read line");
         choice = choice.trim().to_lowercase();
-        match choice.as_str() {
+
+        let win = match choice.as_str() {
             "c" => play_color(),
             "p" => play_parity(),
             "h" => play_half(),
@@ -37,11 +61,28 @@ fn main() {
                 continue;
             }
         };
-        break;
+
+        if win > 0 {
+            println!("You won ${} on a bet of ${}!\n\n", bet * win, bet);
+            balance += bet * win;
+        } else {
+            println!("You lost ${}.\n\n", bet);
+            balance -= bet;
+        }
+        println!(
+            "{}{}.",
+            "You now have $".green(),
+            balance.to_string().green()
+        );
+        if balance <= 0 {
+            println!("You've run out of money. Game over!");
+        }
     }
 }
 
 fn spin_table() -> usize {
+    println!("Spinning..........");
+    thread::sleep(Duration::from_secs(2)); // Delay for 2 seconds
     let mut rng = rand::thread_rng();
     rng.gen_range(1..=37)
 
@@ -50,7 +91,7 @@ fn spin_table() -> usize {
     // return 0;
 }
 
-fn play_roulette<G, W>(prompt: &str, validate_guess: G, win_condition: W)
+fn play_roulette<G, W>(prompt: &str, validate_guess: G, win_condition: W) -> bool
 where
     G: Fn() -> usize,
     W: Fn(usize, usize) -> bool,
@@ -62,65 +103,72 @@ where
 
     if win_condition(guess, result) {
         println!("{}", "YOU WIN!".green());
-    } else {
-        println!("{}", "Sorry, you lost.".red());
+        return true; // Player wins
     }
+    println!("{}", "Sorry, you lost.".red());
+    return false; // Player loses
 }
 
-fn play_color() {
+fn play_color() -> i32 {
     let validate_guess = || get_valid_input(1, 2, false);
     let win_condition = |guess, result| get_color_num(result) == guess;
-    play_roulette("Bet on Red (1) or Black (2)", validate_guess, win_condition);
+    let win = play_roulette("Bet on Red (1) or Black (2)", validate_guess, win_condition);
+    if win { 1 } else { 0 }
 }
 
-fn play_parity() {
+fn play_parity() -> i32 {
     let validate_guess = || get_valid_input(1, 2, false);
     let win_condition = |guess, result| get_parity(result) == guess;
-    play_roulette("Bet on Even (1) or Odd (2)", validate_guess, win_condition);
+    let win = play_roulette("Bet on Even (1) or Odd (2)", validate_guess, win_condition);
+    if win { 1 } else { 0 }
 }
 
-fn play_half() {
+fn play_half() -> i32 {
     let validate_guess = || get_valid_input(1, 2, false);
     let win_condition = |guess, result| (guess == 1 && result <= 18) || (guess == 2 && result > 18);
-    play_roulette(
+    let win = play_roulette(
         "Bet on 1-18 (1) or 19-36 (2)",
         validate_guess,
         win_condition,
     );
+    if win { 1 } else { 0 }
 }
 
-fn play_dozen() {
+fn play_dozen() -> i32 {
     let validate_guess = || get_valid_input(1, 3, false);
     let win_condition = |guess, result| {
         (guess == 1 && result <= 12)
             || (guess == 2 && result > 12 && result <= 24)
             || (guess == 3 && result > 24)
     };
-    play_roulette(
+    let win = play_roulette(
         "Bet on 1-12 (1), 13-24 (2), or 25-36 (3)",
         validate_guess,
         win_condition,
     );
+    if win { 2 } else { 0 }
 }
 
-fn play_column() {
+fn play_column() -> i32 {
     let validate_guess = || get_valid_input(1, 3, false);
     let win_condition = |guess, result| {
         (guess == 1 && result % 3 == 1)
             || (guess == 2 && result % 3 == 2)
             || (guess == 3 && result % 3 == 0)
     };
-    play_roulette(
+    let win = play_roulette(
         "Bet on 1st (1), 2nd (2), or 3rd (3) column (see the ASCII art roulette table)",
         validate_guess,
         win_condition,
     );
+    if win { 2 } else { 0 }
 }
 
-fn play_number() {
+fn play_number() -> i32 {
     let validate_guess = || get_valid_input(0, 37, true);
     let win_condition = |guess: usize, result: usize| -> bool { guess == result };
-    play_roulette("Bet on 0, 00, or 1 to 36", validate_guess, win_condition);
+    let win = play_roulette("Bet on 0, 00, or 1 to 36", validate_guess, win_condition);
+    if win { 35 } else { 0 }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

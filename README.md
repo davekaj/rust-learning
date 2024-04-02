@@ -9,7 +9,7 @@ It would actually be a great idea to use this exact concept to learn any new lan
 - [x] Finish Roulette plays
 - [x] Refactor
 - [x] Handle errors to ask again for input
-- [ ] Add in betting
+- [x] Add in betting
 - [ ] Add in commented code (in typical rust format)
 - [ ] Do tests for each game
 
