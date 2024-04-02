@@ -4,7 +4,6 @@ use std::io;
 use std::thread;
 use std::time::Duration;
 
-
 // Constants for better readability
 const ZERO: &str = "0";
 const DOUBLE_ZERO: &str = "00";
@@ -138,7 +137,11 @@ fn play_color() -> i32 {
     let validate_guess = || get_valid_input(1, 2, false);
     let win_condition = |guess, result| get_color_num(result) == guess;
     let win = play_roulette("Bet on Red (1) or Black (2)", validate_guess, win_condition);
-    if win { 1 } else { 0 }
+    if win {
+        1
+    } else {
+        0
+    }
 }
 
 /// Facilitates betting on the parity outcome of the spin.
@@ -150,11 +153,15 @@ fn play_parity() -> i32 {
     let validate_guess = || get_valid_input(1, 2, false);
     let win_condition = |guess, result| get_parity(result) == guess;
     let win = play_roulette("Bet on Even (1) or Odd (2)", validate_guess, win_condition);
-    if win { 1 } else { 0 }
+    if win {
+        1
+    } else {
+        0
+    }
 }
 
 /// Facilitates betting on the 1-18 or 19-36 outcome of the spin.
-/// 
+///
 /// Returns:
 /// - `1` if the player wins (the payout is 1:1).
 /// - `0` if the player loses.
@@ -166,11 +173,15 @@ fn play_half() -> i32 {
         validate_guess,
         win_condition,
     );
-    if win { 1 } else { 0 }
+    if win {
+        1
+    } else {
+        0
+    }
 }
 
 /// Facilitates betting on the dozen outcome of the spin.
-/// 
+///
 /// Returns:
 /// - `2` if the player wins (the payout is 2:1).
 /// - `0` if the player loses.
@@ -186,11 +197,15 @@ fn play_dozen() -> i32 {
         validate_guess,
         win_condition,
     );
-    if win { 2 } else { 0 }
+    if win {
+        2
+    } else {
+        0
+    }
 }
 
 /// Facilitates betting on the column outcome of the spin.
-/// 
+///
 /// Returns:
 /// - `2` if the player wins (the payout is 2:1).
 /// - `0` if the player loses.
@@ -206,11 +221,15 @@ fn play_column() -> i32 {
         validate_guess,
         win_condition,
     );
-    if win { 2 } else { 0 }
+    if win {
+        2
+    } else {
+        0
+    }
 }
 
 /// Facilitates betting on a specific number outcome of the spin.
-/// 
+///
 /// Returns:
 /// - `35` if the player wins (the payout is 35:1).
 /// - `0` if the player loses.
@@ -218,7 +237,11 @@ fn play_number() -> i32 {
     let validate_guess = || get_valid_input(0, 37, true);
     let win_condition = |guess: usize, result: usize| -> bool { guess == result };
     let win = play_roulette("Bet on 0, 00, or 1 to 36", validate_guess, win_condition);
-    if win { 35 } else { 0 }
+    if win {
+        35
+    } else {
+        0
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -390,4 +413,217 @@ fn print_roulette_table() {
         colorize_number(35),
         colorize_number(36)
     );
+}
+
+// TODO - Most tests hang on user input, or the 2 seconds delay in `spin_table`. Would need to refactor
+// the functions in order to handle testing better.
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Tests that `get_color_num` correctly identifies the color of a given number.
+    #[test]
+    fn test_get_color_num() {
+        assert_eq!(get_color_num(1), RED, "Number 1 should be red.");
+        assert_eq!(get_color_num(2), BLACK, "Number 2 should be black.");
+        assert_eq!(
+            get_color_num(0),
+            ZERO_OR_DOUBLE,
+            "Number 0 should be green."
+        );
+        assert_eq!(
+            get_color_num(37),
+            ZERO_OR_DOUBLE,
+            "Number 37 (00) should be green."
+        );
+        // Additional assertions can be added here for other specific numbers.
+    }
+
+    // Stub for testing `spin_table` functionality.
+    // #[test]
+    // fn test_spin_table_range() {
+    //     for _ in 0..100 {
+    //         let result = spin_table();
+    //         assert!(
+    //             result >= 1 && result <= 37,
+    //             "Result out of range: {}",
+    //             result
+    //         );
+    //     }
+    // }
+
+    // // Stub for testing the `play_roulette` function's behavior.
+    // #[test]
+    // fn test_play_roulette_win_condition() {
+    //     // Implement this test to verify that `play_roulette` correctly identifies win conditions.
+    // }
+
+    // // Stub for testing the bet validation logic.
+    // #[test]
+    // fn test_bet_validation() {
+    //     // Implement this test to check if bets outside the valid range are correctly identified and handled.
+    // }
+
+    // // Stub for integration testing of the betting loop logic.
+    // #[test]
+    // fn test_game_betting_logic() {
+    //     // Implement this test to simulate a sequence of bets and verify the game's handling of win/loss and balance adjustment.
+    // }
+
+    // // Stub for testing correct handling of invalid input.
+    // #[test]
+    // fn test_invalid_input_handling() {
+    //     // Implement this test to ensure the game gracefully handles invalid input without crashing.
+    // }
+
+    // // Stub for testing payout calculations.
+    // #[test]
+    // fn test_payout_calculations() {
+    //     // This test should verify that payouts are calculated correctly for various bets.
+    // }
+
+    #[test]
+    fn test_get_parity() {
+        assert_eq!(get_parity(0), ZERO_OR_DOUBLE);
+        assert_eq!(get_parity(37), ZERO_OR_DOUBLE);
+        assert_eq!(get_parity(2), EVEN);
+        assert_eq!(get_parity(3), ODD);
+    }
+
+    // #[test]
+    // fn test_colorize_number() {
+    //     // Stub
+    // }
+
+    // #[test]
+    // fn test_get_valid_input() {
+    //     // Stub
+    // }
+
+    // #[test]
+    // fn test_play_roulette() {
+    //     // Test win condition
+    //     let validate_guess = || 1;
+    //     let win_condition = |guess: usize, result: usize| guess == result;
+    //     assert!(play_roulette("Test win", validate_guess, win_condition));
+
+    //     // Test lose condition
+    //     let validate_guess = || 1;
+    //     let win_condition = |guess: usize, result: usize| guess != result;
+    //     assert!(!play_roulette("Test lose", validate_guess, win_condition));
+    // }
+
+    // #[test]
+    // fn test_play_color() {
+    //     // Test win scenario
+    //     let result = spin_table();
+    //     let expected_win = if get_color_num(result) == RED { 1 } else { 0 };
+    //     assert_eq!(play_color(), expected_win);
+
+    //     // Test lose scenario
+    //     let result = spin_table();
+    //     let expected_lose = if get_color_num(result) == BLACK { 0 } else { 1 };
+    //     assert_eq!(play_color(), expected_lose);
+    // }
+
+    // #[test]
+    // fn test_play_parity() {
+    //     // Test win scenario
+    //     let result = spin_table();
+    //     let expected_win = if get_parity(result) == EVEN { 1 } else { 0 };
+    //     assert_eq!(play_parity(), expected_win);
+
+    //     // Test lose scenario
+    //     let result = spin_table();
+    //     let expected_lose = if get_parity(result) == ODD { 0 } else { 1 };
+    //     assert_eq!(play_parity(), expected_lose);
+    // }
+
+    // #[test]
+    // fn test_play_half() {
+    //     // Test win scenario
+    //     let result = spin_table();
+    //     let expected_win = if (result <= 18 && 1 == 1) || (result > 18 && 2 == 2) {
+    //         1
+    //     } else {
+    //         0
+    //     };
+    //     assert_eq!(play_half(), expected_win);
+
+    //     // Test lose scenario
+    //     let result = spin_table();
+    //     let expected_lose = if (result <= 18 && 1 == 2) || (result > 18 && 2 == 1) {
+    //         0
+    //     } else {
+    //         1
+    //     };
+    //     assert_eq!(play_half(), expected_lose);
+    // }
+
+    // #[test]
+    // fn test_play_dozen() {
+    //     // Test win scenario
+    //     let result = spin_table();
+    //     let expected_win = if (result <= 12 && 1 == 1)
+    //         || (result > 12 && result <= 24 && 2 == 2)
+    //         || (result > 24 && 3 == 3)
+    //     {
+    //         2
+    //     } else {
+    //         0
+    //     };
+    //     assert_eq!(play_dozen(), expected_win);
+
+    //     // Test lose scenario
+    //     let result = spin_table();
+    //     let expected_lose = if (result <= 12 && 1 == 2)
+    //         || (result > 12 && result <= 24 && 2 == 3)
+    //         || (result > 24 && 3 == 1)
+    //     {
+    //         0
+    //     } else {
+    //         2
+    //     };
+    //     assert_eq!(play_dozen(), expected_lose);
+    // }
+
+    // #[test]
+    // fn test_play_column() {
+    //     // Test win scenario
+    //     let result = spin_table();
+    //     let expected_win = if (result % 3 == 1 && 1 == 1)
+    //         || (result % 3 == 2 && 2 == 2)
+    //         || (result % 3 == 0 && 3 == 3)
+    //     {
+    //         2
+    //     } else {
+    //         0
+    //     };
+    //     assert_eq!(play_column(), expected_win);
+
+    //     // Test lose scenario
+    //     let result = spin_table();
+    //     let expected_lose = if (result % 3 == 1 && 1 == 2)
+    //         || (result % 3 == 2 && 2 == 3)
+    //         || (result % 3 == 0 && 3 == 1)
+    //     {
+    //         0
+    //     } else {
+    //         2
+    //     };
+    //     assert_eq!(play_column(), expected_lose);
+    // }
+
+    // #[test]
+    // fn test_play_number() {
+    //     // Test win scenario
+    //     let result = spin_table();
+    //     let expected_win = if result == result { 35 } else { 0 };
+    //     assert_eq!(play_number(), expected_win);
+
+    //     // Test lose scenario
+    //     let result = spin_table();
+    //     let expected_lose = if result != result { 35 } else { 0 };
+    //     assert_eq!(play_number(), expected_lose);
+    // }
 }
