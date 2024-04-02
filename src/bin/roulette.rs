@@ -18,6 +18,10 @@ const RED_NUMBERS: [usize; 18] = [
     1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
 ];
 
+/// The entry point of the roulette game application.
+/// Initializes player balance to $100 and runs the main game loop.
+/// The game loop continues until the player's balance is greater than 0.
+/// It handles betting input, choice of bet, and calculates win/loss.
 fn main() {
     print_roulette_table();
     let mut balance: i32 = 100; // Player starts with $100
@@ -80,6 +84,12 @@ fn main() {
     }
 }
 
+/// Simulates spinning the roulette table and returns the result.
+/// Delays the simulation for 2 seconds to mimic the spinning and then generates
+/// a random number between 1 and 37 inclusive to represent the roulette result.
+///
+/// Returns:
+/// A usize representing the slot number where the ball landed.
 fn spin_table() -> usize {
     println!("Spinning..........");
     thread::sleep(Duration::from_secs(2)); // Delay for 2 seconds
@@ -91,6 +101,16 @@ fn spin_table() -> usize {
     // return 0;
 }
 
+/// Executes a round of roulette based on the player's bet and checks if the player wins.
+///
+/// Parameters:
+/// - `prompt`: The message displayed to the player indicating what to bet on.
+/// - `validate_guess`: A closure that validates and returns the player's guess.
+/// - `win_condition`: A closure that determines if the player's guess wins based on the result.
+///
+/// Returns:
+/// - `true` if the player wins the round.
+/// - `false` otherwise.
 fn play_roulette<G, W>(prompt: &str, validate_guess: G, win_condition: W) -> bool
 where
     G: Fn() -> usize,
@@ -103,12 +123,17 @@ where
 
     if win_condition(guess, result) {
         println!("{}", "YOU WIN!".green());
-        return true; // Player wins
+        return true;
     }
     println!("{}", "Sorry, you lost.".red());
-    return false; // Player loses
+    return false;
 }
 
+/// Facilitates betting on the color outcome of the spin.
+///
+/// Returns:
+/// - `1` if the player wins (the payout is 1:1).
+/// - `0` if the player loses.
 fn play_color() -> i32 {
     let validate_guess = || get_valid_input(1, 2, false);
     let win_condition = |guess, result| get_color_num(result) == guess;
@@ -116,6 +141,11 @@ fn play_color() -> i32 {
     if win { 1 } else { 0 }
 }
 
+/// Facilitates betting on the parity outcome of the spin.
+///
+/// Returns:
+/// - `1` if the player wins (the payout is 1:1).
+/// - `0` if the player loses.
 fn play_parity() -> i32 {
     let validate_guess = || get_valid_input(1, 2, false);
     let win_condition = |guess, result| get_parity(result) == guess;
@@ -123,6 +153,11 @@ fn play_parity() -> i32 {
     if win { 1 } else { 0 }
 }
 
+/// Facilitates betting on the 1-18 or 19-36 outcome of the spin.
+/// 
+/// Returns:
+/// - `1` if the player wins (the payout is 1:1).
+/// - `0` if the player loses.
 fn play_half() -> i32 {
     let validate_guess = || get_valid_input(1, 2, false);
     let win_condition = |guess, result| (guess == 1 && result <= 18) || (guess == 2 && result > 18);
@@ -134,6 +169,11 @@ fn play_half() -> i32 {
     if win { 1 } else { 0 }
 }
 
+/// Facilitates betting on the dozen outcome of the spin.
+/// 
+/// Returns:
+/// - `2` if the player wins (the payout is 2:1).
+/// - `0` if the player loses.
 fn play_dozen() -> i32 {
     let validate_guess = || get_valid_input(1, 3, false);
     let win_condition = |guess, result| {
@@ -149,6 +189,11 @@ fn play_dozen() -> i32 {
     if win { 2 } else { 0 }
 }
 
+/// Facilitates betting on the column outcome of the spin.
+/// 
+/// Returns:
+/// - `2` if the player wins (the payout is 2:1).
+/// - `0` if the player loses.
 fn play_column() -> i32 {
     let validate_guess = || get_valid_input(1, 3, false);
     let win_condition = |guess, result| {
@@ -164,6 +209,11 @@ fn play_column() -> i32 {
     if win { 2 } else { 0 }
 }
 
+/// Facilitates betting on a specific number outcome of the spin.
+/// 
+/// Returns:
+/// - `35` if the player wins (the payout is 35:1).
+/// - `0` if the player loses.
 fn play_number() -> i32 {
     let validate_guess = || get_valid_input(0, 37, true);
     let win_condition = |guess: usize, result: usize| -> bool { guess == result };
@@ -175,6 +225,15 @@ fn play_number() -> i32 {
 ///////////////////////////////////////// HELPER FUNCTIONS /////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Retrieves a valid input from the user within a specified range.
+///
+/// Parameters:
+/// - `min`: The minimum acceptable value (inclusive).
+/// - `max`: The maximum acceptable value (inclusive).
+/// - `bet_00`: A flag indicating whether the special case of "00" is allowed.
+///
+/// Returns:
+/// - A usize representing the user's validated input.
 fn get_valid_input(min: usize, max: usize, bet_00: bool) -> usize {
     loop {
         let mut guess = String::new();
@@ -203,6 +262,15 @@ fn get_valid_input(min: usize, max: usize, bet_00: bool) -> usize {
     }
 }
 
+/// Determines the parity (even/odd) of a given number.
+///
+/// Parameters:
+/// - `num`: The number to check the parity of.
+///
+/// Returns:
+/// - `ZERO_OR_DOUBLE` if the number is 0 or 00.
+/// - `EVEN` if the number is even.
+/// - `ODD` if the number is odd.
 fn get_parity(num: usize) -> usize {
     if num == 0 || num == 37 {
         return ZERO_OR_DOUBLE;
@@ -215,7 +283,15 @@ fn get_parity(num: usize) -> usize {
     }
 }
 
-// 0 = green, 1 = red, 2 = black
+/// Determines the color of a given slot number.
+///
+/// Parameters:
+/// - `num`: The slot number to check the color of.
+///
+/// Returns:
+/// - `ZERO_OR_DOUBLE` if the number is 0 or 00 (green).
+/// - `RED` if the number is associated with a red slot.
+/// - `BLACK` if the number is associated with a black slot.
 fn get_color_num(num: usize) -> usize {
     if num == 0 || num == 37 {
         return ZERO_OR_DOUBLE;
@@ -228,15 +304,23 @@ fn get_color_num(num: usize) -> usize {
     }
 }
 
+/// Applies coloring to the number based on its associated color in roulette.
+///
+/// Parameters:
+/// - `num`: The roulette number to colorize.
+///
+/// Returns:
+/// - A `ColoredString` with the number colored according to its roulette color
 fn colorize_number(num: usize) -> ColoredString {
     match num {
-        0 => ZERO.green(),         // colorize_number "0" as green.
+        0 => ZERO.green(),
         37 => DOUBLE_ZERO.green(), // Special handling for "00" to display it correctly.
         _ if RED_NUMBERS.contains(&num) => format!("{}", num.to_string().red()).into(),
         _ => format!("{}", num.to_string().black()).into(),
     }
 }
 
+/// Prints the ASCII art representation of a roulette table to the console.
 fn print_roulette_table() {
     println!("\n  Welcome to the roulette table!\n");
     println!(
