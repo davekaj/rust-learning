@@ -5,6 +5,6 @@ Starting off building a bunch of casino games. They are well defined games, wher
 
 It would actually be a great idea to use this exact concept to learn any new language. If I want to learn Clojure after Rust, then I already have all the Rust examples, and I can use it as a reference
 
-## TODO
-- [ ] Do tests for each game (Randomness and user input make this a bit harder)
-- [ ] Make a single entry point for all games?
+## Future work
+- Do tests for each game (Randomness and user input make this a bit harder, so it would mean adjusting the code to handle inputs that are not random)
+- Make a single entry point for all games (i.e. a casino.rs that allows you to play all the games)
